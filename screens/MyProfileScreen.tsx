@@ -34,7 +34,7 @@ const PINK = "#ff2d7a";
 const TAB_KEYS = ["My Videos", "My Images", "Liked"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
-const INDICATOR_W = 74; // chiều rộng thanh hồng
+const INDICATOR_W = 74;
 
 const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
   // ===== Mock data =====
@@ -77,17 +77,14 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
     [videos, images, liked]
   );
 
-  // ===== States =====
   const [tab, setTab] = useState<TabKey>("My Videos");
   const [refreshing, setRefreshing] = useState(false);
   const [activeBottom, setActiveBottom] =
     useState<Exclude<BottomKey, "add">>("profile");
 
-  // ===== Pager + Animated =====
   const scrollX = useRef(new Animated.Value(0)).current;
   const pagerRef = useRef<FlatList>(null);
 
-  // đo layout của từng tab để đặt indicator chính xác
   const [tabLayouts, setTabLayouts] = useState<
     Array<{ x: number; width: number }>
   >([{ x: 0, width: INDICATOR_W }, { x: 0, width: INDICATOR_W }, { x: 0, width: INDICATOR_W }]);
@@ -103,10 +100,8 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
       });
     };
 
-  // tạo range cho interpolate
   const inputRange = PAGES.map((_, i) => i * SCREEN_W);
   const centers = tabLayouts.map((t) => t.x + t.width / 2);
-  // nếu chưa đo xong hết tab, fallback vị trí đều nhau
   const fallbackCenters = [SCREEN_W / 2 - 120, SCREEN_W / 2, SCREEN_W / 2 + 120];
   const outputRange =
     centers.every((c) => c > 0)
@@ -134,13 +129,32 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
     />
   );
 
+  // 👇 Điều hướng đầy đủ + giữ active
   const onBottomNavigate = (key: BottomKey) => {
-    if (key === "add") {
-      console.log("Add new content");
-      return;
-    }
-    setActiveBottom(key);
-  };
+  if (key === "add") {
+    navigation?.navigate?.("CreateVideo" as any);
+    return;
+  }
+
+  const targetKey = key as Exclude<BottomKey, "add">; // ép kiểu hợp lệ
+  setActiveBottom(targetKey);
+
+  switch (key) {
+    case "home":
+      navigation?.navigate?.("Home" as any);
+      break;
+    case "search":
+      navigation?.navigate?.("Search" as any);
+      break;
+    case "friends":
+      navigation?.navigate?.("Friends" as any);
+      break;
+    case "profile":
+      navigation?.navigate?.("MyProfile" as any);
+      break;
+  }
+};
+
 
   const onPressTab = (t: TabKey) => {
     setTab(t);
@@ -178,7 +192,7 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
           <Stat number="2634" label="Like" />
         </View>
 
-        {/* ===== Tabs with icons + Animated indicator ===== */}
+        {/* ===== Tabs + Animated indicator ===== */}
         <View style={styles.tabsWrap}>
           <View style={styles.tabs}>
             {TAB_KEYS.map((t, i) => {
@@ -207,7 +221,6 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
             })}
           </View>
 
-          {/* indicator */}
           <Animated.View
             style={[
               styles.indicator,
@@ -220,7 +233,7 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       </View>
 
-      {/* ===== Pager ngang: vuốt để đổi tab ===== */}
+      {/* ===== Pager ===== */}
       <Animated.FlatList
         ref={pagerRef}
         data={PAGES}
@@ -251,9 +264,7 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
               contentContainerStyle={[styles.listContainer, { paddingBottom: BOTTOM_H }]}
               columnWrapperStyle={{ gap: GUTTER }}
               ItemSeparatorComponent={() => <View style={{ height: GUTTER }} />}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
+              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
             />
           </View>
         )}
@@ -306,16 +317,8 @@ const styles = StyleSheet.create({
   },
 
   // tabs + indicator
-  tabsWrap: {
-    marginTop: 14,
-    paddingBottom: 10,
-  },
-  tabs: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 24,
-    paddingHorizontal: 16,
-  },
+  tabsWrap: { marginTop: 14, paddingBottom: 10 },
+  tabs: { flexDirection: "row", justifyContent: "center", gap: 24, paddingHorizontal: 16 },
   tab: { paddingVertical: 6 },
   tabActive: {},
   tabContent: { flexDirection: "row", alignItems: "center", gap: 6 },
@@ -327,7 +330,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     alignSelf: "flex-start",
     marginTop: 8,
-    marginLeft: 16, // để hệ toạ độ của translateX khớp trong vùng tabs
+    marginLeft: 16,
   },
 
   // list

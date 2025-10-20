@@ -5,6 +5,10 @@ export type AuthStackParamList = {
 export type AppStackParamList = {
   Home: undefined;
   MyProfile: undefined;
-  ProfileDetails: undefined;
+  ProfileDetails: { id?: string } | undefined;
+  Search: undefined;
+  Friends?: undefined;
+  CreateVideo?: undefined;
+  Auth: undefined;
   Detail: { id: string };
 };
