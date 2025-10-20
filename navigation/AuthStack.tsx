@@ -18,14 +18,14 @@ export default function AuthStack() {
         name="Login"
         component={LoginScreen}
         options={{
-          animation: "slide_from_bottom",
+          animation: "slide_from_left",
         }}
       />
       <Stack.Screen
         name="Register"
         component={RegisterScreen}
         options={{
-          animation: "slide_from_bottom",
+          animation: "slide_from_right",
         }}
       />
     </Stack.Navigator>

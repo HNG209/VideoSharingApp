@@ -12,26 +12,36 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../types/navigation";
+import { RegisterValues } from "../types/user";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../store/store";
+import { registerUserService } from "../services/user.service";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
-
-interface RegisterValues {
-  username: string;
-  email: string;
-  password: string;
-}
 
 const registerSchema = Yup.object().shape({
   username: Yup.string().required("Nhập tên người dùng"),
   email: Yup.string().email("Email không hợp lệ").required("Nhập email"),
   password: Yup.string().min(6, "Ít nhất 6 ký tự").required("Nhập mật khẩu"),
+  confirmPassword: Yup.string()
+    .nullable()
+    .oneOf([Yup.ref("password")], "Mật khẩu không khớp")
+    .required("Nhập lại mật khẩu"),
 });
 
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
+  const dispatch = useDispatch<AppDispatch>();
+
   const handleRegister = (values: RegisterValues) => {
-    // TODO: Gọi API đăng ký
-    Alert.alert("Đăng ký thành công", `Chào mừng ${values.username}!`);
-    navigation.navigate("Login");
+    try {
+      registerUserService(values);
+      // TODO: Gọi API đăng ký
+      Alert.alert("Đăng ký thành công", "Vui lòng đăng nhập.");
+      navigation.navigate("Login");
+    } catch (error) {
+      // console.error("Register error:", error);
+      Alert.alert("Đăng ký thất bại", "Vui lòng thử lại sau.");
+    }
   };
 
   return (
@@ -39,7 +49,12 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
       <Text style={styles.title}>Đăng ký tài khoản</Text>
 
       <Formik
-        initialValues={{ username: "", email: "", password: "" }}
+        initialValues={{
+          username: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        }}
         validationSchema={registerSchema}
         onSubmit={handleRegister}
       >
@@ -79,6 +94,20 @@ const RegisterScreen: React.FC<Props> = ({ navigation }) => {
               ]}
               onChangeText={handleChange("password")}
               value={values.password}
+            />
+
+            {/* Nhập lại mật khẩu */}
+            <TextInput
+              placeholder="Nhập lại mật khẩu"
+              secureTextEntry
+              style={[
+                styles.input,
+                errors.confirmPassword && submitCount > 0
+                  ? styles.inputError
+                  : null,
+              ]}
+              onChangeText={handleChange("confirmPassword")}
+              value={values.confirmPassword}
             />
 
             <TouchableOpacity

@@ -12,30 +12,30 @@ import { Formik } from "formik";
 import * as Yup from "yup";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../types/navigation";
+import { useDispatch } from "react-redux";
+import { LoginValues } from "../types/user";
+import { login } from "../store/slices/auth.slice";
+import { AppDispatch } from "../store/store";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
-interface LoginValues {
-  email: string;
-  password: string;
-}
-
 const loginSchema = Yup.object().shape({
-  email: Yup.string()
-    .email("Email không hợp lệ")
-    .required("Bắt buộc nhập email"),
+  username: Yup.string().required("Bắt buộc nhập tên đăng nhập"),
   password: Yup.string()
     .min(6, "Tối thiểu 6 ký tự")
     .required("Bắt buộc nhập mật khẩu"),
 });
 
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
+  const dispatch = useDispatch<AppDispatch>();
+
   const handleLogin = (values: LoginValues) => {
-    // TODO: Gọi API đăng nhập
-    Alert.alert(
-      "Thông báo",
-      `Email: ${values.email}\nPassword: ${values.password}`
-    );
+    try {
+      dispatch(login(values)).unwrap();
+      Alert.alert("Thông báo", "Đăng nhập thành công.");
+    } catch (error) {
+      Alert.alert("Thông báo", "Đăng nhập thất bại. Vui lòng thử lại.");
+    }
   };
 
   return (
@@ -43,7 +43,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       <Text style={styles.title}>Đăng nhập</Text>
 
       <Formik
-        initialValues={{ email: "", password: "" }}
+        initialValues={{ username: "", password: "" }}
         validationSchema={loginSchema}
         onSubmit={handleLogin}
       >
@@ -58,15 +58,14 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
         }) => (
           <>
             <TextInput
-              placeholder="Email"
+              placeholder="Tên đăng nhập"
               style={[
                 styles.input,
-                errors.email && submitCount > 0 ? styles.inputError : null,
+                errors.username && submitCount > 0 ? styles.inputError : null,
               ]}
-              onChangeText={handleChange("email")}
-              onBlur={handleBlur("email")}
-              value={values.email}
-              keyboardType="email-address"
+              onChangeText={handleChange("username")}
+              onBlur={handleBlur("username")}
+              value={values.username}
               autoCapitalize="none"
             />
 
