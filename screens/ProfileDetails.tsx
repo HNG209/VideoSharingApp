@@ -59,16 +59,6 @@ export default function ProfileDetails({ navigation }: Props) {
     []
   );
 
-  // const suggests: Suggest[] = useMemo(
-  //   () => [
-  //     { id: "s1", name: "Vinh", avatar: "https://i.pravatar.cc/100?img=36" },
-  //     { id: "s2", name: "Hưng", avatar: "https://i.pravatar.cc/100?img=12" },
-  //     { id: "s3", name: "Tài", avatar: "https://i.pravatar.cc/100?img=7" },
-  //     { id: "s4", name: "Lan", avatar: "https://i.pravatar.cc/100?img=22" },
-  //     { id: "s5", name: "Minh", avatar: "https://i.pravatar.cc/100?img=45" },
-  //   ],
-  //   []
-  // );
   const suggests: Suggest[] = useMemo(() => {
     const names = ["Vinh", "Hưng", "Tài", "Lan", "Minh", "Thảo", "Tuấn", "My", "Dũng", "Phúc"];
     const total = 10; 
@@ -88,7 +78,7 @@ export default function ProfileDetails({ navigation }: Props) {
   );
 
   // ===== state =====
-  const [tab, setTab] = useState<TabKey>("Liked"); // giống hình bạn gửi
+  const [tab, setTab] = useState<TabKey>("Liked"); 
   const [refreshing, setRefreshing] = useState(false);
 
   // ===== pager + indicator =====
@@ -143,8 +133,7 @@ export default function ProfileDetails({ navigation }: Props) {
       width={CARD_W}
       height={CARD_W * 1.45}
       onPress={() => {
-        // ví dụ: mở chi tiết video
-        // navigation?.navigate?.("Detail" as any, { id: item.id });
+
       }}
     />
   );
