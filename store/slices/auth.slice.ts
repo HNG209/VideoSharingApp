@@ -9,20 +9,18 @@ export const login = createAsyncThunk<User, LoginValues>(
   "auth/login",
   async (loginValues, thunkAPI) => {
     try {
-      // console.log("loginValues", loginValues);
-      return loginUserService(loginValues);
-    } catch (error) {
-      console.error("Login error:", error);
-      return thunkAPI.rejectWithValue("Đăng nhập thất bại");
+      return await loginUserService(loginValues);
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(`Đăng nhập thất bại\n${error.message}`);
     }
   }
 );
 
 export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
   try {
-    return logoutUserService();
-  } catch (error) {
-    return thunkAPI.rejectWithValue("Đăng xuất thất bại");
+    return await logoutUserService();
+  } catch (error: any) {
+    return thunkAPI.rejectWithValue(`Đăng xuất thất bại\n${error.message}`);
   }
 });
 
@@ -45,13 +43,11 @@ const authSlice = createSlice({
       .addCase(
         login.fulfilled,
         (state: AuthState, action: PayloadAction<User>) => {
-          console.log("action.payload", action.payload);
           state.isLoggedIn = true;
           state.user = action.payload;
         }
       )
       .addCase(login.rejected, (state: AuthState, action) => {
-        console.error("Login rejected:", action.payload);
         state.isLoggedIn = false;
         state.user = null;
       })

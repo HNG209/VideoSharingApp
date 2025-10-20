@@ -32,14 +32,12 @@ const registerSchema = Yup.object().shape({
 const RegisterScreen: React.FC<Props> = ({ navigation }) => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const handleRegister = (values: RegisterValues) => {
+  const handleRegister = async (values: RegisterValues) => {
     try {
-      registerUserService(values);
-      // TODO: Gọi API đăng ký
+      await registerUserService(values);
       Alert.alert("Đăng ký thành công", "Vui lòng đăng nhập.");
       navigation.navigate("Login");
     } catch (error) {
-      // console.error("Register error:", error);
       Alert.alert("Đăng ký thất bại", "Vui lòng thử lại sau.");
     }
   };

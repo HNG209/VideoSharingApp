@@ -29,12 +29,12 @@ const loginSchema = Yup.object().shape({
 const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const dispatch = useDispatch<AppDispatch>();
 
-  const handleLogin = (values: LoginValues) => {
+  const handleLogin = async (values: LoginValues) => {
     try {
-      dispatch(login(values)).unwrap();
-      Alert.alert("Thông báo", "Đăng nhập thành công.");
-    } catch (error) {
-      Alert.alert("Thông báo", "Đăng nhập thất bại. Vui lòng thử lại.");
+      await dispatch(login(values)).unwrap();
+      // Alert.alert("Thông báo", "Đăng nhập thành công.");
+    } catch (error: any) {
+      Alert.alert("Thông báo", error.toString());
     }
   };
 
