@@ -11,7 +11,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../types/navigation";
-import BottomBar, { BottomKey } from "../components/ProfileDetails/BottomBar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = Partial<NativeStackScreenProps<AppStackParamList, "Friends">>;
 
@@ -29,6 +29,7 @@ const TABS = ["All", "Following", "Followers", "Requests"] as const;
 type TabKey = (typeof TABS)[number];
 
 const FriendsScreen: React.FC<Props> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   const [query, setQuery] = useState("");
   const [tab, setTab] = useState<TabKey>("All");
 
@@ -36,13 +37,20 @@ const FriendsScreen: React.FC<Props> = ({ navigation }) => {
     () =>
       Array.from({ length: 24 }).map((_, i) => ({
         id: `f${i + 1}`,
-        name: ["Laura", "Liz", "Daniel", "Cris", "Lina", "Adam", "Peter", "Rose"][
-          i % 8
-        ],
+        name: [
+          "Laura",
+          "Liz",
+          "Daniel",
+          "Cris",
+          "Lina",
+          "Adam",
+          "Peter",
+          "Rose",
+        ][i % 8],
         avatar: `https://i.pravatar.cc/100?img=${i + 10}`,
-        status: (["following", "follower", "mutual", "request"][
+        status: ["following", "follower", "mutual", "request"][
           i % 4
-        ] as Friend["status"]),
+        ] as Friend["status"],
       })),
     []
   );
@@ -59,24 +67,6 @@ const FriendsScreen: React.FC<Props> = ({ navigation }) => {
     const passQuery = d.name.toLowerCase().includes(query.toLowerCase());
     return passTab && passQuery;
   });
-
-  const onBottomNavigate = (key: BottomKey) => {
-    if (key === "add") return navigation?.navigate?.("CreateVideo" as any);
-    switch (key) {
-      case "home":
-        navigation?.navigate?.("Home" as any);
-        break;
-      case "search":
-        navigation?.navigate?.("Search" as any);
-        break;
-      case "friends":
-        navigation?.navigate?.("Friends" as any);
-        break;
-      case "profile":
-        navigation?.navigate?.("MyProfile" as any);
-        break;
-    }
-  };
 
   const renderAction = (f: Friend) => {
     if (f.status === "request") {
@@ -127,7 +117,7 @@ const FriendsScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Search */}
       <View style={styles.searchRow}>
         <View style={styles.searchBox}>
@@ -170,11 +160,13 @@ const FriendsScreen: React.FC<Props> = ({ navigation }) => {
         keyExtractor={(it) => it.id}
         renderItem={renderItem}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-        contentContainerStyle={{ paddingHorizontal: 16, padding: 16, paddingBottom: 96 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          padding: 16,
+          paddingBottom: 96,
+        }}
         showsVerticalScrollIndicator={false}
       />
-
-      <BottomBar active="friends" onNavigate={onBottomNavigate} />
     </View>
   );
 };
@@ -182,7 +174,7 @@ const FriendsScreen: React.FC<Props> = ({ navigation }) => {
 export default FriendsScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", paddingTop: 30 },
+  container: { flex: 1, backgroundColor: "#fff" },
   // search
   searchRow: {
     flexDirection: "row",

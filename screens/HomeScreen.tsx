@@ -13,6 +13,7 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../types/navigation";
 import BottomBar, { BottomKey } from "../components/ProfileDetails/BottomBar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = Partial<NativeStackScreenProps<AppStackParamList, "Home">>;
 const { width } = Dimensions.get("window");
@@ -21,17 +22,47 @@ const GREY = "#8E8E93";
 
 const useHomeData = () => {
   const stories = useMemo(() => {
-    const randomNames = ["Adam","William","Peter","Julia","Rose","Sophia","David","Liam"];
+    const randomNames = [
+      "Adam",
+      "William",
+      "Peter",
+      "Julia",
+      "Rose",
+      "Sophia",
+      "David",
+      "Liam",
+    ];
     const generated = Array.from({ length: randomNames.length }, (_, i) => ({
       id: `${i + 1}`,
       name: randomNames[i],
-      avatar: `https://i.pravatar.cc/100?img=${Math.floor(Math.random() * 70) + 1}`,
+      avatar: `https://i.pravatar.cc/100?img=${
+        Math.floor(Math.random() * 70) + 1
+      }`,
     }));
-    return [{ id: "me", name: "You", avatar: "https://i.pravatar.cc/100?img=64", you: true }, ...generated];
+    return [
+      {
+        id: "me",
+        name: "You",
+        avatar: "https://i.pravatar.cc/100?img=64",
+        you: true,
+      },
+      ...generated,
+    ];
   }, []);
 
   const trending = useMemo(() => {
-    const sampleTitles = ["Lovely","Sweet","Explore","Adventure","Dreamscape","Nature","City Lights","Moments","Journey","Memories"];
+    const sampleTitles = [
+      "Lovely",
+      "Sweet",
+      "Explore",
+      "Adventure",
+      "Dreamscape",
+      "Nature",
+      "City Lights",
+      "Moments",
+      "Journey",
+      "Memories",
+    ];
     return Array.from({ length: 20 }, (_, i) => ({
       id: `t${i + 1}`,
       title: sampleTitles[i % sampleTitles.length],
@@ -43,14 +74,46 @@ const useHomeData = () => {
   const topics = useMemo(
     () =>
       [
-        { key: "sports", label: "Sports", icon: <Feather name="activity" size={18} color={PINK} /> },
-        { key: "podcasts", label: "Podcasts", icon: <Feather name="mic" size={18} color={PINK} /> },
-        { key: "news", label: "News", icon: <Feather name="file-text" size={18} color={PINK} /> },
-        { key: "travel", label: "Travel", icon: <Feather name="globe" size={18} color={PINK} /> },
-        { key: "health", label: "Health", icon: <Feather name="heart" size={18} color={PINK} /> },
-        { key: "weather", label: "Weather", icon: <Feather name="cloud" size={18} color={PINK} /> },
-        { key: "art", label: "Art", icon: <Feather name="image" size={18} color={PINK} /> },
-        { key: "more", label: "+20\nTopics", icon: <Feather name="hash" size={18} color={PINK} /> },
+        {
+          key: "sports",
+          label: "Sports",
+          icon: <Feather name="activity" size={18} color={PINK} />,
+        },
+        {
+          key: "podcasts",
+          label: "Podcasts",
+          icon: <Feather name="mic" size={18} color={PINK} />,
+        },
+        {
+          key: "news",
+          label: "News",
+          icon: <Feather name="file-text" size={18} color={PINK} />,
+        },
+        {
+          key: "travel",
+          label: "Travel",
+          icon: <Feather name="globe" size={18} color={PINK} />,
+        },
+        {
+          key: "health",
+          label: "Health",
+          icon: <Feather name="heart" size={18} color={PINK} />,
+        },
+        {
+          key: "weather",
+          label: "Weather",
+          icon: <Feather name="cloud" size={18} color={PINK} />,
+        },
+        {
+          key: "art",
+          label: "Art",
+          icon: <Feather name="image" size={18} color={PINK} />,
+        },
+        {
+          key: "more",
+          label: "+20\nTopics",
+          icon: <Feather name="hash" size={18} color={PINK} />,
+        },
       ] as const,
     []
   );
@@ -84,35 +147,18 @@ const useHomeData = () => {
 
 const HomeScreen: React.FC<Props> = ({ navigation }) => {
   const { stories, trending, topics, streaming, audio } = useHomeData();
+  const insets = useSafeAreaInsets();
 
   const handleOpenTrending = (id: string) => {
     navigation?.navigate?.("ProfileDetails", { id });
   };
 
-  // 👇 ĐIỀU HƯỚNG ĐẦY ĐỦ CHO BOTTOM NAV
-  const onBottomNavigate = (key: BottomKey) => {
-    switch (key) {
-      case "home":
-        navigation?.navigate?.("Home" as any);
-        break;
-      case "search":
-        navigation?.navigate?.("Search" as any); 
-        break;
-      case "friends":
-        navigation?.navigate?.("Friends" as any);
-        break;
-      case "profile":
-        navigation?.navigate?.("MyProfile" as any);
-        break;
-      case "add":
-        navigation?.navigate?.("CreateVideo" as any);
-        break;
-    }
-  };
-
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 90 }} showsVerticalScrollIndicator={false}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 90 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <View style={styles.header}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -130,11 +176,18 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 8, gap: 16 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: 8,
+            gap: 16,
+          }}
           renderItem={({ item }: any) => (
             <View style={{ alignItems: "center" }}>
               <View style={styles.storyCircle}>
-                <Image source={{ uri: item.avatar }} style={styles.storyAvatar} />
+                <Image
+                  source={{ uri: item.avatar }}
+                  style={styles.storyAvatar}
+                />
                 {item.you && (
                   <View style={styles.plusBadge}>
                     <Ionicons name="add" size={12} color="#fff" />
@@ -156,8 +209,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
           renderItem={({ item }: any) => (
-            <Pressable onPress={() => handleOpenTrending(item.id)} style={styles.trendCard}>
-              <Image source={{ uri: item.img }} style={StyleSheet.absoluteFillObject as any} />
+            <Pressable
+              onPress={() => handleOpenTrending(item.id)}
+              style={styles.trendCard}
+            >
+              <Image
+                source={{ uri: item.img }}
+                style={StyleSheet.absoluteFillObject as any}
+              />
               <View style={styles.trendOverlay} />
               <Text style={styles.trendTitle}>{item.title}</Text>
               <View style={styles.viewRow}>
@@ -168,7 +227,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           )}
         />
 
-        <Text style={styles.blockTitle}>Browse topic</Text>
+        <SectionHeader title="Browse topics" onMore={() => {}} />
         <View style={styles.topicGrid}>
           {(topics as any).map((t: any) => (
             <Pressable key={t.key} style={styles.topicItem} onPress={() => {}}>
@@ -188,8 +247,14 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
           renderItem={({ item }: any) => (
-            <Pressable style={styles.streamCard} onPress={() => handleOpenTrending(item.id)}>
-              <Image source={{ uri: item.img }} style={StyleSheet.absoluteFillObject as any} />
+            <Pressable
+              style={styles.streamCard}
+              onPress={() => handleOpenTrending(item.id)}
+            >
+              <Image
+                source={{ uri: item.img }}
+                style={StyleSheet.absoluteFillObject as any}
+              />
               <View style={styles.labelBadge}>
                 <Text style={styles.badgeText}>{item.ago}</Text>
               </View>
@@ -198,7 +263,10 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
                 <View style={styles.streamMeta}>
                   <Feather name="play" size={10} color="#fff" />
                   <Text style={styles.streamViews}>{item.views}</Text>
-                  <Image source={{ uri: item.author }} style={styles.streamAuthor} />
+                  <Image
+                    source={{ uri: item.author }}
+                    style={styles.streamAuthor}
+                  />
                 </View>
               </View>
             </Pressable>
@@ -226,16 +294,19 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
           )}
         />
       </ScrollView>
-
-      {/* Bottom bar */}
-      <BottomBar active="home" onNavigate={onBottomNavigate} />
     </View>
   );
 };
 
 export default HomeScreen;
 
-const SectionHeader = ({ title, onMore }: { title: string; onMore?: () => void }) => (
+const SectionHeader = ({
+  title,
+  onMore,
+}: {
+  title: string;
+  onMore?: () => void;
+}) => (
   <View style={styles.sectionHeader}>
     <Text style={styles.blockTitle}>{title}</Text>
     <Pressable hitSlop={8} onPress={onMore}>
@@ -250,7 +321,6 @@ const STREAM_W = width * 0.58;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
   header: {
-    paddingTop: 16,
     paddingHorizontal: 16,
     paddingBottom: 8,
     flexDirection: "row",
@@ -260,48 +330,120 @@ const styles = StyleSheet.create({
   logoDot: { width: 14, height: 14, borderRadius: 7, backgroundColor: PINK },
   title: { fontSize: 18, fontWeight: "800" },
   storyCircle: {
-    width: 58, height: 58, borderRadius: 29, borderWidth: 2, borderColor: PINK,
-    alignItems: "center", justifyContent: "center",
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 2,
+    borderColor: PINK,
+    alignItems: "center",
+    justifyContent: "center",
   },
   storyAvatar: { width: 52, height: 52, borderRadius: 26 },
-  storyName: { marginTop: 6, fontSize: 12, color: "#666", width: 60, textAlign: "center" },
+  storyName: {
+    marginTop: 6,
+    fontSize: 12,
+    color: "#666",
+    width: 60,
+    textAlign: "center",
+  },
   plusBadge: {
-    position: "absolute", right: -2, bottom: -2, width: 18, height: 18, borderRadius: 9,
-    backgroundColor: PINK, alignItems: "center", justifyContent: "center",
-    borderWidth: 2, borderColor: "#fff",
+    position: "absolute",
+    right: -2,
+    bottom: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: PINK,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
   sectionHeader: {
-    width: "100%", paddingHorizontal: 16, marginTop: 8, marginBottom: 8,
-    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
+    width: "100%",
+    paddingHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   blockTitle: { fontSize: 16, fontWeight: "800" },
 
   trendCard: {
-    width: CARD_W, height: CARD_W * 0.72, borderRadius: 14, overflow: "hidden", backgroundColor: "#ddd",
+    width: CARD_W,
+    height: CARD_W * 0.72,
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: "#ddd",
   },
-  trendOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.25)" },
-  trendTitle: { position: "absolute", left: 12, bottom: 28, color: "#fff", fontWeight: "700", fontSize: 14 },
-  viewRow: { position: "absolute", left: 10, bottom: 8, flexDirection: "row", alignItems: "center", gap: 6 },
+  trendOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
+  trendTitle: {
+    position: "absolute",
+    left: 12,
+    bottom: 28,
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  viewRow: {
+    position: "absolute",
+    left: 10,
+    bottom: 8,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
   viewText: { color: "#fff", fontSize: 12 },
 
   topicGrid: {
-    flexDirection: "row", flexWrap: "wrap", rowGap: 12, columnGap: 12,
-    paddingHorizontal: 16, marginTop: 6, marginBottom: 6,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    rowGap: 12,
+    columnGap: 12,
+    paddingHorizontal: 16,
+    marginTop: 6,
+    marginBottom: 6,
   },
   topicItem: {
-    width: (width - 16 * 2 - 12 * 3) / 4, height: 66, borderRadius: 12, backgroundColor: "#f6f7f9",
-    alignItems: "center", justifyContent: "center", paddingHorizontal: 4,
+    width: (width - 16 * 2 - 12 * 3) / 4,
+    height: 66,
+    borderRadius: 12,
+    backgroundColor: "#f6f7f9",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 4,
   },
   topicIcon: {
-    width: 30, height: 30, borderRadius: 15, backgroundColor: "#ffe6ef",
-    alignItems: "center", justifyContent: "center", marginBottom: 6,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#ffe6ef",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
   },
   topicText: { textAlign: "center", fontSize: 12, color: "#444" },
 
   streamCard: {
-    width: STREAM_W, height: STREAM_W * 0.7, borderRadius: 14, overflow: "hidden", backgroundColor: "#ddd",
+    width: STREAM_W,
+    height: STREAM_W * 0.7,
+    borderRadius: 14,
+    overflow: "hidden",
+    backgroundColor: "#ddd",
   },
-  labelBadge: { position: "absolute", left: 8, top: 8, backgroundColor: PINK, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 4 },
+  labelBadge: {
+    position: "absolute",
+    left: 8,
+    top: 8,
+    backgroundColor: PINK,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
   badgeText: { color: "#fff", fontSize: 10, fontWeight: "700" },
   streamFooter: { position: "absolute", left: 10, right: 10, bottom: 8 },
   streamTitle: { color: "#fff", fontWeight: "700", marginBottom: 4 },
@@ -310,7 +452,12 @@ const styles = StyleSheet.create({
   streamAuthor: { width: 18, height: 18, borderRadius: 9, marginLeft: "auto" },
 
   audioItem: { width: 112 },
-  audioImg: { width: 112, height: 112, borderRadius: 10, backgroundColor: "#ddd" },
+  audioImg: {
+    width: 112,
+    height: 112,
+    borderRadius: 10,
+    backgroundColor: "#ddd",
+  },
   audioTitle: { marginTop: 8, fontWeight: "700" },
   audioSub: { color: "#7a7a7a", fontSize: 12 },
 });

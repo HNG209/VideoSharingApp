@@ -12,3 +12,13 @@ export type AppStackParamList = {
   Auth: undefined;
   Detail: { id: string };
 };
+
+export type MainTabParamList = {
+  Home: undefined;
+  MyProfile: undefined;
+  ProfileDetails: { id?: string } | undefined;
+  Search: undefined;
+  Friends?: undefined;
+  CreateVideo?: undefined;
+  Detail: { id: string };
+};

@@ -16,6 +16,7 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../types/navigation";
 import BottomBar, { BottomKey } from "../components/ProfileDetails/BottomBar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = Partial<NativeStackScreenProps<AppStackParamList, "Search">>;
 
@@ -50,7 +51,10 @@ const TrendingGrid = memo(function TrendingGrid({
   onPressCard: (id: string) => void;
 }) {
   const renderItem = ({ item }: { item: Card }) => (
-    <Pressable onPress={() => onPressCard(item.id)} style={[styles.card, { width: CARD_W }]}>
+    <Pressable
+      onPress={() => onPressCard(item.id)}
+      style={[styles.card, { width: CARD_W }]}
+    >
       <View style={styles.posterWrap}>
         <Image source={{ uri: item.image }} style={styles.poster} />
         {item.badge && (
@@ -73,7 +77,10 @@ const TrendingGrid = memo(function TrendingGrid({
         {item.title}
       </Text>
       <View style={styles.authorRow}>
-        <Image source={{ uri: item.authorAvatar }} style={styles.authorAvatar} />
+        <Image
+          source={{ uri: item.authorAvatar }}
+          style={styles.authorAvatar}
+        />
         <Text style={styles.authorName}>{item.author}</Text>
       </View>
     </Pressable>
@@ -92,7 +99,13 @@ const TrendingGrid = memo(function TrendingGrid({
   );
 });
 
-type Account = { id: string; name: string; avatar: string; followers: string; following?: boolean };
+type Account = {
+  id: string;
+  name: string;
+  avatar: string;
+  followers: string;
+  following?: boolean;
+};
 const AccountsList = memo(function AccountsList({ data }: { data: Account[] }) {
   const renderItem = ({ item }: { item: Account }) => (
     <View style={styles.accRow}>
@@ -103,8 +116,15 @@ const AccountsList = memo(function AccountsList({ data }: { data: Account[] }) {
           <Text style={styles.accSub}>{item.followers} followers</Text>
         </View>
       </View>
-      <Pressable style={[styles.btn, item.following ? styles.btnGhost : styles.btnPrimary]}>
-        <Text style={item.following ? styles.btnGhostText : styles.btnPrimaryText}>
+      <Pressable
+        style={[
+          styles.btn,
+          item.following ? styles.btnGhost : styles.btnPrimary,
+        ]}
+      >
+        <Text
+          style={item.following ? styles.btnGhostText : styles.btnPrimaryText}
+        >
           {item.following ? "Following" : "Follow"}
         </Text>
       </Pressable>
@@ -198,6 +218,7 @@ const AudioList = memo(function AudioList({ data }: { data: Track[] }) {
 const SearchScreen: React.FC<Props> = ({ navigation }) => {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<TabKey>("Trending");
+  const insets = useSafeAreaInsets();
 
   // indicator for tabs
   const xVals = useRef<number[]>(new Array(TABS.length).fill(0)).current;
@@ -207,8 +228,16 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
 
   const moveIndicator = (idx: number) => {
     Animated.parallel([
-      Animated.timing(indX, { toValue: xVals[idx], duration: 160, useNativeDriver: false }),
-      Animated.timing(indW, { toValue: wVals[idx], duration: 160, useNativeDriver: false }),
+      Animated.timing(indX, {
+        toValue: xVals[idx],
+        duration: 160,
+        useNativeDriver: false,
+      }),
+      Animated.timing(indW, {
+        toValue: wVals[idx],
+        duration: 160,
+        useNativeDriver: false,
+      }),
     ]).start();
   };
 
@@ -222,7 +251,12 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
     () =>
       Array.from({ length: 12 }).map((_, i) => ({
         id: `c${i + 1}`,
-        title: ["Eiusmod Lorem", "Reprehenderit mollit", "Consectetur aliquip", "Aute in nostrud"][i % 4],
+        title: [
+          "Eiusmod Lorem",
+          "Reprehenderit mollit",
+          "Consectetur aliquip",
+          "Aute in nostrud",
+        ][i % 4],
         author: ["Laura", "Liz", "Cris", "Lina"][i % 4],
         authorAvatar: `https://i.pravatar.cc/100?img=${20 + i}`,
         image: `https://picsum.photos/seed/pet${i + 1}/700/900`,
@@ -237,7 +271,16 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
     () =>
       Array.from({ length: 16 }).map((_, i) => ({
         id: `a${i + 1}`,
-        name: ["Laura", "Liz", "Daniel", "Cris", "Lina", "Adam", "Peter", "Rose"][i % 8],
+        name: [
+          "Laura",
+          "Liz",
+          "Daniel",
+          "Cris",
+          "Lina",
+          "Adam",
+          "Peter",
+          "Rose",
+        ][i % 8],
         avatar: `https://i.pravatar.cc/100?img=${i + 5}`,
         followers: `${(Math.random() * 500 + 20).toFixed(1)}k`,
         following: Math.random() > 0.6,
@@ -249,7 +292,9 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
     () =>
       Array.from({ length: 8 }).map((_, i) => ({
         id: `l${i + 1}`,
-        title: ["Morning walk", "Beach live", "Play with cats", "Cute puppy"][i % 4],
+        title: ["Morning walk", "Beach live", "Play with cats", "Cute puppy"][
+          i % 4
+        ],
         thumbnail: `https://picsum.photos/seed/live${i + 1}/700/900`,
         viewers: `${(Math.random() * 8 + 1).toFixed(1)}k watching`,
       })),
@@ -262,7 +307,9 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
         id: `t${i + 1}`,
         title: ["Sunny Day", "Cat Dance", "Bark Beat", "Ocean Loop"][i % 4],
         author: ["@audiohub", "@popmix", "@soundlab", "@beatbox"][i % 4],
-        duration: `0${(Math.floor(Math.random() * 3) + 1)}:${(Math.floor(Math.random() * 50) + 10)
+        duration: `0${Math.floor(Math.random() * 3) + 1}:${(
+          Math.floor(Math.random() * 50) + 10
+        )
           .toString()
           .padStart(2, "0")}`,
       })),
@@ -283,31 +330,22 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   const chips = useMemo(
-    () => ["Funny momments of pet", "Cats", "Dogs", "Foods for pet", "Vet center"],
+    () => [
+      "Funny momments of pet",
+      "Cats",
+      "Dogs",
+      "Foods for pet",
+      "Vet center",
+    ],
     []
   );
 
-  const onBottomNavigate = (key: BottomKey) => {
-    if (key === "add") return navigation?.navigate?.("CreateVideo" as any);
-    switch (key) {
-      case "home":
-        navigation?.navigate?.("Home" as any);
-        break;
-      case "search":
-        navigation?.navigate?.("Search" as any);
-        break;
-      case "friends":
-        navigation?.navigate?.("Friends" as any);
-        break;
-      case "profile":
-        navigation?.navigate?.("MyProfile" as any);
-        break;
-    }
-  };
-
   return (
-    <View style={styles.container}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 96 }} showsVerticalScrollIndicator={false}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 96 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Search bar */}
         <View style={styles.searchRow}>
           <View style={styles.searchBox}>
@@ -350,7 +388,9 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
                   }}
                   onPress={() => onPressTab(t, i)}
                 >
-                  <Text style={[styles.tabText, active && { color: "#fff" }]}>{t}</Text>
+                  <Text style={[styles.tabText, active && { color: "#fff" }]}>
+                    {t}
+                  </Text>
                 </Pressable>
               );
             })}
@@ -371,7 +411,9 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
         {activeTab === "Trending" && (
           <TrendingGrid
             data={filteredCards}
-            onPressCard={(id) => navigation?.navigate?.("ProfileDetails" as any, { id })}
+            onPressCard={(id) =>
+              navigation?.navigate?.("ProfileDetails" as any, { id })
+            }
           />
         )}
         {activeTab === "Accounts" && <AccountsList data={filteredAccounts} />}
@@ -388,8 +430,6 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
           ))}
         </View>
       </ScrollView>
-
-      <BottomBar active="search" onNavigate={onBottomNavigate} />
     </View>
   );
 };
@@ -403,7 +443,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
   // search
-  searchRow: { flexDirection: "row", paddingHorizontal: 16, paddingTop: 14, alignItems: "center", gap: 10 },
+  searchRow: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    alignItems: "center",
+    gap: 10,
+  },
   searchBox: {
     flex: 1,
     height: 38,
@@ -416,33 +461,80 @@ const styles = StyleSheet.create({
   },
   input: { flex: 1, fontSize: 15, paddingVertical: 8, color: "#222" },
   filterBtn: {
-    width: 38, height: 38, borderRadius: 10, backgroundColor: "#f4f5f7",
-    alignItems: "center", justifyContent: "center",
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: "#f4f5f7",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   // tabs
-  tabsWrap: { marginTop: 16, paddingHorizontal: 16, position: "relative", marginBottom: 12 },
+  tabsWrap: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+    position: "relative",
+    marginBottom: 12,
+  },
   tabsRow: { flexDirection: "row", gap: 10 },
-  tabItem: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 18, backgroundColor: "#f6f6f8" },
+  tabItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    backgroundColor: "#f6f6f8",
+  },
   tabActive: { backgroundColor: PINK },
   tabText: { fontWeight: "700", color: "#7a7a7d" },
-  indicator: { position: "absolute", height: 36, borderRadius: 18, backgroundColor: PINK, left: 16, top: 0, opacity: 0.18 },
+  indicator: {
+    position: "absolute",
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: PINK,
+    left: 16,
+    top: 0,
+    opacity: 0.18,
+  },
 
   // grid/trending
   card: { borderRadius: 10 },
-  posterWrap: { height: 200, borderRadius: 10, overflow: "hidden", backgroundColor: "#ddd" },
+  posterWrap: {
+    height: 200,
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "#ddd",
+  },
   poster: { width: "100%", height: "100%" },
-  badge: { position: "absolute", left: 8, top: 8, backgroundColor: PINK, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 3 },
+  badge: {
+    position: "absolute",
+    left: 8,
+    top: 8,
+    backgroundColor: PINK,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
   badgeText: { color: "#fff", fontSize: 10, fontWeight: "700" },
   metrics: {
-    position: "absolute", right: 8, bottom: 8, flexDirection: "row", gap: 10,
-    backgroundColor: "rgba(0,0,0,0.25)", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12,
+    position: "absolute",
+    right: 8,
+    bottom: 8,
+    flexDirection: "row",
+    gap: 10,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
   },
   metricRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   metricText: { color: "#fff", fontSize: 12 },
 
   cardTitle: { marginTop: 8, fontWeight: "700", color: "#222" },
-  authorRow: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 8 },
+  authorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 8,
+  },
   authorAvatar: { width: 20, height: 20, borderRadius: 10 },
   authorName: { color: "#666" },
 
@@ -458,14 +550,28 @@ const styles = StyleSheet.create({
   accAvatar: { width: 44, height: 44, borderRadius: 22 },
   accName: { fontWeight: "700", fontSize: 16 },
   accSub: { color: "#8b97a8", marginTop: 2 },
-  btn: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 16, alignItems: "center", justifyContent: "center" },
+  btn: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   btnPrimary: { backgroundColor: PINK },
   btnPrimaryText: { color: "#fff", fontWeight: "700" },
   btnGhost: { backgroundColor: "#f6f7fb" },
   btnGhostText: { color: "#5d6a7a", fontWeight: "700" },
 
   // streaming
-  liveBadge: { position: "absolute", left: 8, top: 8, backgroundColor: PINK, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 10 },
+  liveBadge: {
+    position: "absolute",
+    left: 8,
+    top: 8,
+    backgroundColor: PINK,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
   liveText: { color: "#fff", fontSize: 10, fontWeight: "700" },
 
   // audio
@@ -479,16 +585,45 @@ const styles = StyleSheet.create({
   },
   trackLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
   trackThumb: {
-    width: 36, height: 36, borderRadius: 8, backgroundColor: PINK,
-    alignItems: "center", justifyContent: "center",
+    width: 36,
+    height: 36,
+    borderRadius: 8,
+    backgroundColor: PINK,
+    alignItems: "center",
+    justifyContent: "center",
   },
   trackTitle: { fontWeight: "700", maxWidth: width * 0.55 },
   trackSub: { color: "#8b97a8", marginTop: 2, maxWidth: width * 0.55 },
-  playBtn: { width: 34, height: 34, borderRadius: 8, backgroundColor: "#ffe6ef", alignItems: "center", justifyContent: "center" },
+  playBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    backgroundColor: "#ffe6ef",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   // chips
-  suggestTitle: { marginTop: 16, marginHorizontal: 16, fontWeight: "800", fontSize: 16 },
-  chipsWrap: { flexDirection: "row", flexWrap: "wrap", gap: 10, paddingHorizontal: 16, paddingTop: 10 },
-  chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, backgroundColor: "#f6f7fb", alignItems: "center", justifyContent: "center" },
+  suggestTitle: {
+    marginTop: 16,
+    marginHorizontal: 16,
+    fontWeight: "800",
+    fontSize: 16,
+  },
+  chipsWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+  },
+  chip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: "#f6f7fb",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   chipText: { color: "#5d6a7a", fontWeight: "600" },
 });

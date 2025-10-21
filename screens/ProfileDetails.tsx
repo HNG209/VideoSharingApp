@@ -21,8 +21,11 @@ import HeaderBar, { HIcons } from "../components/ProfileDetails/HeaderBar";
 import StatsTriplet from "../components/ProfileDetails/StatsTriplet";
 import SuggestCard, { Suggest } from "../components/ProfileDetails/SuggestCard";
 import VideoCard from "../components/VideoCard";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type Props = Partial<NativeStackScreenProps<AppStackParamList, "ProfileDetails">>;
+type Props = Partial<
+  NativeStackScreenProps<AppStackParamList, "ProfileDetails">
+>;
 type Media = { id: string; thumbnail: string; views?: string };
 
 const { width: SCREEN_W } = Dimensions.get("window");
@@ -38,6 +41,8 @@ type TabKey = (typeof TAB_KEYS)[number];
 const INDICATOR_W = 64;
 
 export default function ProfileDetails({ navigation }: Props) {
+  const insets = useSafeAreaInsets();
+
   // ===== mock data =====
   const videos: Media[] = useMemo(
     () =>
@@ -60,12 +65,25 @@ export default function ProfileDetails({ navigation }: Props) {
   );
 
   const suggests: Suggest[] = useMemo(() => {
-    const names = ["Vinh", "Hưng", "Tài", "Lan", "Minh", "Thảo", "Tuấn", "My", "Dũng", "Phúc"];
-    const total = 10; 
+    const names = [
+      "Vinh",
+      "Hưng",
+      "Tài",
+      "Lan",
+      "Minh",
+      "Thảo",
+      "Tuấn",
+      "My",
+      "Dũng",
+      "Phúc",
+    ];
+    const total = 10;
     return Array.from({ length: total }).map((_, i) => ({
       id: `s${i + 1}`,
       name: names[i % names.length],
-      avatar: `https://i.pravatar.cc/100?img=${Math.floor(Math.random() * 70) + 1}`, // random 1–70
+      avatar: `https://i.pravatar.cc/100?img=${
+        Math.floor(Math.random() * 70) + 1
+      }`, // random 1–70
     }));
   }, []);
 
@@ -78,7 +96,7 @@ export default function ProfileDetails({ navigation }: Props) {
   );
 
   // ===== state =====
-  const [tab, setTab] = useState<TabKey>("Liked"); 
+  const [tab, setTab] = useState<TabKey>("Liked");
   const [refreshing, setRefreshing] = useState(false);
 
   // ===== pager + indicator =====
@@ -88,7 +106,10 @@ export default function ProfileDetails({ navigation }: Props) {
   // đo layout từng tab để canh indicator
   const [tabLayouts, setTabLayouts] = useState<
     Array<{ x: number; width: number }>
-  >([{ x: 0, width: INDICATOR_W }, { x: 0, width: INDICATOR_W }]);
+  >([
+    { x: 0, width: INDICATOR_W },
+    { x: 0, width: INDICATOR_W },
+  ]);
 
   const onTabLayout =
     (index: number) =>
@@ -104,10 +125,9 @@ export default function ProfileDetails({ navigation }: Props) {
   const inputRange = PAGES.map((_, i) => i * SCREEN_W);
   const centers = tabLayouts.map((t) => t.x + t.width / 2);
   const fallbackCenters = [SCREEN_W / 2 - 60, SCREEN_W / 2 + 60];
-  const outputRange =
-    centers.every((c) => c > 0)
-      ? centers.map((c) => c - INDICATOR_W / 2)
-      : fallbackCenters.map((c) => c - INDICATOR_W / 2);
+  const outputRange = centers.every((c) => c > 0)
+    ? centers.map((c) => c - INDICATOR_W / 2)
+    : fallbackCenters.map((c) => c - INDICATOR_W / 2);
 
   const translateX = scrollX.interpolate({
     inputRange,
@@ -132,22 +152,24 @@ export default function ProfileDetails({ navigation }: Props) {
       views={item.views}
       width={CARD_W}
       height={CARD_W * 1.45}
-      onPress={() => {
-
-      }}
+      onPress={() => {}}
     />
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <View style={{ flex: 1, backgroundColor: "#fff", paddingTop: insets.top }}>
       {/* Header */}
       <HeaderBar
         actions={[
-          { side: "left", key: "back", icon: HIcons.back(), onPress: () => navigation?.goBack?.() },
+          {
+            side: "left",
+            key: "back",
+            icon: HIcons.back(),
+            onPress: () => navigation?.goBack?.(),
+          },
           { side: "right", key: "bell", icon: HIcons.bell() },
           { side: "right", key: "more", icon: HIcons.more() },
         ]}
-        topPadding={15}
       />
 
       <FlatList
@@ -156,7 +178,10 @@ export default function ProfileDetails({ navigation }: Props) {
             {/* top user block */}
             <View style={styles.top}>
               <View style={styles.avatarWrap}>
-                <Image source={{ uri: "https://i.pravatar.cc/200?img=5" }} style={styles.avatar} />
+                <Image
+                  source={{ uri: "https://i.pravatar.cc/200?img=5" }}
+                  style={styles.avatar}
+                />
               </View>
               <Text style={styles.name}>Kiran Glaucus</Text>
               <Text style={styles.bio}>I love a colorful life ❤️❤️❤️</Text>
@@ -171,10 +196,14 @@ export default function ProfileDetails({ navigation }: Props) {
 
               <View style={styles.actions}>
                 <View style={[styles.btn, { backgroundColor: PINK }]}>
-                  <Text style={{ color: "#fff", fontWeight: "700" }}>Follow</Text>
+                  <Text style={{ color: "#fff", fontWeight: "700" }}>
+                    Follow
+                  </Text>
                 </View>
                 <View style={[styles.btn, { backgroundColor: "#ffe6ef" }]}>
-                  <Text style={{ color: PINK, fontWeight: "700" }}>Message</Text>
+                  <Text style={{ color: PINK, fontWeight: "700" }}>
+                    Message
+                  </Text>
                 </View>
               </View>
 
@@ -182,7 +211,9 @@ export default function ProfileDetails({ navigation }: Props) {
               <View style={styles.suggestHeader}>
                 <Text style={{ fontWeight: "700" }}>Suggested accounts</Text>
                 <Pressable hitSlop={8} onPress={() => {}}>
-                  <Text style={{ color: PINK, fontWeight: "600" }}>View more</Text>
+                  <Text style={{ color: PINK, fontWeight: "600" }}>
+                    View more
+                  </Text>
                 </Pressable>
               </View>
 
@@ -190,7 +221,11 @@ export default function ProfileDetails({ navigation }: Props) {
                 data={suggests}
                 keyExtractor={(i) => i.id}
                 renderItem={({ item }) => (
-                  <SuggestCard item={item} onClose={() => {}} onFollow={() => {}} />
+                  <SuggestCard
+                    item={item}
+                    onClose={() => {}}
+                    onFollow={() => {}}
+                  />
                 )}
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -205,9 +240,17 @@ export default function ProfileDetails({ navigation }: Props) {
                     const active = t === tab;
                     const icon =
                       t === "Videos" ? (
-                        <Feather name="play" size={16} color={active ? PINK : GREY} />
+                        <Feather
+                          name="play"
+                          size={16}
+                          color={active ? PINK : GREY}
+                        />
                       ) : (
-                        <Feather name="heart" size={16} color={active ? PINK : GREY} />
+                        <Feather
+                          name="heart"
+                          size={16}
+                          color={active ? PINK : GREY}
+                        />
                       );
                     return (
                       <Pressable
@@ -218,7 +261,14 @@ export default function ProfileDetails({ navigation }: Props) {
                       >
                         <View style={styles.tabContent}>
                           {icon}
-                          <Text style={[styles.tabText, active && styles.tabTextActive]}>{t}</Text>
+                          <Text
+                            style={[
+                              styles.tabText,
+                              active && styles.tabTextActive,
+                            ]}
+                          >
+                            {t}
+                          </Text>
                         </View>
                       </Pressable>
                     );
@@ -235,7 +285,7 @@ export default function ProfileDetails({ navigation }: Props) {
             </View>
           </>
         }
-        data={[0]} 
+        data={[0]}
         keyExtractor={() => "pager"}
         renderItem={() => (
           <Animated.FlatList
@@ -251,7 +301,9 @@ export default function ProfileDetails({ navigation }: Props) {
               index,
             })}
             onMomentumScrollEnd={(e) => {
-              const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W);
+              const index = Math.round(
+                e.nativeEvent.contentOffset.x / SCREEN_W
+              );
               setTab(PAGES[index].key);
             }}
             onScroll={Animated.event(
@@ -265,11 +317,19 @@ export default function ProfileDetails({ navigation }: Props) {
                   numColumns={COLS}
                   keyExtractor={(it) => it.id}
                   renderItem={renderGridItem}
-                  contentContainerStyle={{ paddingHorizontal: GUTTER, paddingBottom: 24 }}
+                  contentContainerStyle={{
+                    paddingHorizontal: GUTTER,
+                    paddingBottom: 24,
+                  }}
                   columnWrapperStyle={{ gap: GUTTER }}
-                  ItemSeparatorComponent={() => <View style={{ height: GUTTER }} />}
+                  ItemSeparatorComponent={() => (
+                    <View style={{ height: GUTTER }} />
+                  )}
                   refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={onRefresh}
+                    />
                   }
                 />
               </View>
@@ -285,11 +345,18 @@ const styles = StyleSheet.create({
   top: {
     paddingBottom: 6,
     paddingHorizontal: 16,
-    alignItems: "center",       
+    alignItems: "center",
   },
   avatarWrap: {
-    width: 92, height: 92, borderRadius: 46, borderWidth: 2, borderColor: PINK,
-    alignSelf: "center", alignItems: "center", justifyContent: "center", marginTop: 4,
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+    borderWidth: 2,
+    borderColor: PINK,
+    alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 4,
   },
   avatar: { width: 84, height: 84, borderRadius: 42 },
   name: { fontSize: 20, fontWeight: "800", textAlign: "center", marginTop: 8 },
@@ -299,39 +366,45 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
     marginTop: 14,
-    width: "100%",               
-    justifyContent: "center",     
+    width: "100%",
+    justifyContent: "center",
     alignItems: "center",
   },
-  
-  btn: {
-  height: 36,
-  minWidth: 120,                
-  paddingHorizontal: 22,
-  borderRadius: 10,
-  alignItems: "center",
-  justifyContent: "center",
-},
 
+  btn: {
+    height: 36,
+    minWidth: 120,
+    paddingHorizontal: 22,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   suggestHeader: {
-  width: "100%",
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  paddingHorizontal: 16,
-  marginTop: 18,
-},
-
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    marginTop: 18,
+  },
 
   tabsWrap: { marginTop: 10, paddingBottom: 10 },
-  tabs: { flexDirection: "row", justifyContent: "center", gap: 28, paddingHorizontal: 16 },
+  tabs: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 28,
+    paddingHorizontal: 16,
+  },
   tab: { paddingVertical: 6 },
   tabContent: { flexDirection: "row", alignItems: "center", gap: 6 },
   tabText: { color: "#7a7a7a", fontWeight: "600" },
   tabTextActive: { color: PINK },
   indicator: {
-    height: 2, backgroundColor: PINK, borderRadius: 2,
-    marginTop: 6, marginLeft: 16,
+    height: 2,
+    backgroundColor: PINK,
+    borderRadius: 2,
+    marginTop: 6,
+    marginLeft: 16,
   },
 });

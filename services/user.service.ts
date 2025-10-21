@@ -16,7 +16,8 @@ export const loginUserService = async (loginValues: LoginValues) => {
     username: loginValues.username,
     password: loginValues.password,
   });
-  const { accessToken, refreshToken, user } = response.data;
+  console.log("Login response:", response.data.data.user);
+  const { accessToken, refreshToken, user } = response.data.data;
 
   // Lưu tokens vào SecureStore
   await TokenService.saveTokens(accessToken, refreshToken);

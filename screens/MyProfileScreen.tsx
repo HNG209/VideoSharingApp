@@ -11,6 +11,7 @@ import {
   Pressable,
   Animated,
   LayoutChangeEvent,
+  AppState,
 } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import type { ReactElement } from "react";
@@ -18,6 +19,9 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../types/navigation";
 import VideoCard from "../components/VideoCard";
 import BottomBar, { BottomKey } from "../components/ProfileDetails/BottomBar";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
 
 type Props = Partial<NativeStackScreenProps<AppStackParamList, "MyProfile">>;
 type Media = { id: string; thumbnail: string; views?: string };
@@ -37,6 +41,11 @@ type TabKey = (typeof TAB_KEYS)[number];
 const INDICATOR_W = 74;
 
 const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const profile = useSelector((state: RootState) => state.auth.user);
+
   // ===== Mock data =====
   const videos: Media[] = useMemo(
     () =>
@@ -87,7 +96,11 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
 
   const [tabLayouts, setTabLayouts] = useState<
     Array<{ x: number; width: number }>
-  >([{ x: 0, width: INDICATOR_W }, { x: 0, width: INDICATOR_W }, { x: 0, width: INDICATOR_W }]);
+  >([
+    { x: 0, width: INDICATOR_W },
+    { x: 0, width: INDICATOR_W },
+    { x: 0, width: INDICATOR_W },
+  ]);
 
   const onTabLayout =
     (index: number) =>
@@ -102,11 +115,14 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
 
   const inputRange = PAGES.map((_, i) => i * SCREEN_W);
   const centers = tabLayouts.map((t) => t.x + t.width / 2);
-  const fallbackCenters = [SCREEN_W / 2 - 120, SCREEN_W / 2, SCREEN_W / 2 + 120];
-  const outputRange =
-    centers.every((c) => c > 0)
-      ? centers.map((c) => c - INDICATOR_W / 2)
-      : fallbackCenters.map((c) => c - INDICATOR_W / 2);
+  const fallbackCenters = [
+    SCREEN_W / 2 - 120,
+    SCREEN_W / 2,
+    SCREEN_W / 2 + 120,
+  ];
+  const outputRange = centers.every((c) => c > 0)
+    ? centers.map((c) => c - INDICATOR_W / 2)
+    : fallbackCenters.map((c) => c - INDICATOR_W / 2);
 
   const translateX = scrollX.interpolate({
     inputRange,
@@ -125,36 +141,11 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
       views={item.views}
       width={CARD_W}
       height={CARD_W * 1.45}
-      onPress={() => navigation?.navigate?.("ProfileDetails" as any, { id: item.id })}
+      onPress={() =>
+        navigation?.navigate?.("ProfileDetails" as any, { id: item.id })
+      }
     />
   );
-
-  // 👇 Điều hướng đầy đủ + giữ active
-  const onBottomNavigate = (key: BottomKey) => {
-  if (key === "add") {
-    navigation?.navigate?.("CreateVideo" as any);
-    return;
-  }
-
-  const targetKey = key as Exclude<BottomKey, "add">; // ép kiểu hợp lệ
-  setActiveBottom(targetKey);
-
-  switch (key) {
-    case "home":
-      navigation?.navigate?.("Home" as any);
-      break;
-    case "search":
-      navigation?.navigate?.("Search" as any);
-      break;
-    case "friends":
-      navigation?.navigate?.("Friends" as any);
-      break;
-    case "profile":
-      navigation?.navigate?.("MyProfile" as any);
-      break;
-  }
-};
-
 
   const onPressTab = (t: TabKey) => {
     setTab(t);
@@ -163,7 +154,7 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* ===== Header ===== */}
       <View style={styles.headerRow}>
         <View style={styles.left}>
@@ -183,14 +174,19 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
 
       {/* ===== Profile info ===== */}
       <View style={styles.headerCenter}>
-        <Image source={{ uri: "https://i.pravatar.cc/200" }} style={styles.avatar} />
-        <Text style={styles.name}>Ruth Sanders</Text>
+        <Image
+          source={{ uri: "https://i.pravatar.cc/200" }}
+          style={styles.avatar}
+        />
+        <Text style={styles.name}>{profile?.name || profile?.username}</Text>
+        <Text style={styles.username}>{"@" + profile?.username}</Text>
 
         <View style={styles.statsRow}>
           <Stat number="203" label="Following" />
           <Stat number="628" label="Followers" />
           <Stat number="2634" label="Like" />
         </View>
+        <Text style={styles.bio}>Lorem ipsum dolor sit amet</Text>
 
         {/* ===== Tabs + Animated indicator ===== */}
         <View style={styles.tabsWrap}>
@@ -199,11 +195,29 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
               const active = t === tab;
               let icon: ReactElement | null = null;
               if (t === "My Videos")
-                icon = <Feather name="play" size={16} color={active ? PINK : ICON_GREY} />;
+                icon = (
+                  <Feather
+                    name="play"
+                    size={16}
+                    color={active ? PINK : ICON_GREY}
+                  />
+                );
               if (t === "My Images")
-                icon = <Feather name="image" size={16} color={active ? PINK : ICON_GREY} />;
+                icon = (
+                  <Feather
+                    name="image"
+                    size={16}
+                    color={active ? PINK : ICON_GREY}
+                  />
+                );
               if (t === "Liked")
-                icon = <Feather name="heart" size={16} color={active ? PINK : ICON_GREY} />;
+                icon = (
+                  <Feather
+                    name="heart"
+                    size={16}
+                    color={active ? PINK : ICON_GREY}
+                  />
+                );
 
               return (
                 <Pressable
@@ -214,7 +228,11 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
                 >
                   <View style={styles.tabContent}>
                     {icon}
-                    <Text style={[styles.tabText, active && styles.tabTextActive]}>{t}</Text>
+                    <Text
+                      style={[styles.tabText, active && styles.tabTextActive]}
+                    >
+                      {t}
+                    </Text>
                   </View>
                 </Pressable>
               );
@@ -261,17 +279,19 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
               numColumns={COLS}
               keyExtractor={(it) => it.id}
               renderItem={renderGridItem}
-              contentContainerStyle={[styles.listContainer, { paddingBottom: BOTTOM_H }]}
+              contentContainerStyle={[
+                styles.listContainer,
+                { paddingBottom: BOTTOM_H },
+              ]}
               columnWrapperStyle={{ gap: GUTTER }}
               ItemSeparatorComponent={() => <View style={{ height: GUTTER }} />}
-              refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+              refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }
             />
           </View>
         )}
       />
-
-      {/* ===== Bottom Bar ===== */}
-      <BottomBar active={activeBottom} onNavigate={onBottomNavigate} />
     </View>
   );
 };
@@ -290,6 +310,23 @@ const Stat = ({ number, label }: { number: string; label: string }) => (
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
+  // username
+  username: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#666",
+    textAlign: "center",
+    marginVertical: 8,
+  },
+
+  // bio
+  bio: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+  },
+
   // header
   headerRow: {
     flexDirection: "row",
@@ -297,8 +334,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
     paddingHorizontal: 16,
-    paddingTop: 30,
-    paddingBottom: 20,
   },
   left: { flexDirection: "row", alignItems: "center", gap: 16 },
   iconBtn: { padding: 6 },
@@ -318,7 +353,12 @@ const styles = StyleSheet.create({
 
   // tabs + indicator
   tabsWrap: { marginTop: 14, paddingBottom: 10 },
-  tabs: { flexDirection: "row", justifyContent: "center", gap: 24, paddingHorizontal: 16 },
+  tabs: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 24,
+    paddingHorizontal: 16,
+  },
   tab: { paddingVertical: 6 },
   tabActive: {},
   tabContent: { flexDirection: "row", alignItems: "center", gap: 6 },
