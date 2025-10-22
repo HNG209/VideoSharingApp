@@ -17,7 +17,7 @@ import {
 import { Feather, Ionicons } from "@expo/vector-icons";
 import type { ReactElement } from "react";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { AppStackParamList } from "../types/navigation";
+import { AppStackParamList, ProfileStackParamList } from "../types/navigation";
 import VideoCard from "../components/VideoCard";
 import BottomBar, { BottomKey } from "../components/ProfileDetails/BottomBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -25,7 +25,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { checkAuth, testAuth } from "../store/slices/auth.slice";
 
-type Props = Partial<NativeStackScreenProps<AppStackParamList, "MyProfile">>;
+type Props = Partial<NativeStackScreenProps<ProfileStackParamList, "Profile">>;
 type Media = { id: string; thumbnail: string; views?: string };
 
 const SCREEN_W = Dimensions.get("window").width;
@@ -170,7 +170,7 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
 
         <TouchableOpacity
           onPress={() => {
-            dispatch(testAuth());
+            navigation?.navigate("EditProfile");
           }}
           style={styles.editWrap}
         >
@@ -185,7 +185,9 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
           source={{ uri: profile?.profile?.avatar }}
           style={styles.avatar}
         />
-        <Text style={styles.name}>{profile?.name || profile?.username}</Text>
+        <Text style={styles.name}>
+          {profile?.profile.displayName || profile?.username}
+        </Text>
         <Text style={styles.username}>{"@" + profile?.username}</Text>
 
         <View style={styles.statsRow}>

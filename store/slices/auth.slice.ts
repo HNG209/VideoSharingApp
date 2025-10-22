@@ -5,6 +5,7 @@ import {
   loginUserService,
   logoutUserService,
   testAuthService,
+  updateProfileService,
 } from "../../services/user.service";
 
 export const checkAuth = createAsyncThunk(
@@ -17,6 +18,20 @@ export const checkAuth = createAsyncThunk(
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
         error.response?.data?.message || "Token không hợp lệ"
+      );
+    }
+  }
+);
+
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (formData: FormData, thunkAPI) => {
+    try {
+      const response = await updateProfileService(formData);
+      return response;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Cập nhật thông tin thất bại"
       );
     }
   }
@@ -92,6 +107,10 @@ const authSlice = createSlice({
 
       .addCase(testAuth.fulfilled, (state: AuthState, action) => {
         console.log("test auth done");
+      })
+
+      .addCase(updateProfile.fulfilled, (state: AuthState, action) => {
+        state.user = action.payload;
       })
 
       .addCase(

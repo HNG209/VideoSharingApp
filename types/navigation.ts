@@ -13,6 +13,11 @@ export type AppStackParamList = {
   Detail: { id: string };
 };
 
+export type ProfileStackParamList = {
+  Profile: undefined;
+  EditProfile: undefined;
+};
+
 export type MainTabParamList = {
   Home: undefined;
   MyProfile: undefined;

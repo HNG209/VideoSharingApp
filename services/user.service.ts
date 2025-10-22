@@ -15,6 +15,13 @@ export const refreshTokenService = async () => {
   return newAccessToken;
 };
 
+export const updateProfileService = async (formData: FormData) => {
+  const response = await axiosInstance.put("/users/profile", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data.result; // updated user info
+};
+
 export const checkAuthService = async () => {
   const accessToken = await TokenService.getAccessToken();
   if (!accessToken) throw new Error("No token");
