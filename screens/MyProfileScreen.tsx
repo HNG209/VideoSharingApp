@@ -12,6 +12,7 @@ import {
   Animated,
   LayoutChangeEvent,
   AppState,
+  TouchableOpacity,
 } from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import type { ReactElement } from "react";
@@ -22,6 +23,7 @@ import BottomBar, { BottomKey } from "../components/ProfileDetails/BottomBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
+import { checkAuth, testAuth } from "../store/slices/auth.slice";
 
 type Props = Partial<NativeStackScreenProps<AppStackParamList, "MyProfile">>;
 type Media = { id: string; thumbnail: string; views?: string };
@@ -166,16 +168,21 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
           </Pressable>
         </View>
 
-        <Pressable onPress={() => {}} style={styles.editWrap}>
+        <TouchableOpacity
+          onPress={() => {
+            dispatch(testAuth());
+          }}
+          style={styles.editWrap}
+        >
           <Feather name="edit-2" size={14} color={PINK} />
           <Text style={styles.editText}> Edit Profile</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
 
       {/* ===== Profile info ===== */}
       <View style={styles.headerCenter}>
         <Image
-          source={{ uri: "https://i.pravatar.cc/200" }}
+          source={{ uri: profile?.profile?.avatar }}
           style={styles.avatar}
         />
         <Text style={styles.name}>{profile?.name || profile?.username}</Text>
@@ -186,7 +193,7 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
           <Stat number="628" label="Followers" />
           <Stat number="2634" label="Like" />
         </View>
-        <Text style={styles.bio}>Lorem ipsum dolor sit amet</Text>
+        <Text style={styles.bio}>{profile?.profile?.bio}</Text>
 
         {/* ===== Tabs + Animated indicator ===== */}
         <View style={styles.tabsWrap}>

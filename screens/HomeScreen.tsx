@@ -161,8 +161,9 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <View style={styles.logoDot} />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+            {/* <View style={styles.logoDot} /> */}
+            <Image source={require("../assets/logo.png")} style={styles.logo} />
             <Text style={styles.title}>Video Sharing App</Text>
           </View>
           <Pressable style={{ padding: 6 }}>
@@ -327,8 +328,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
+  logo: {
+    width: 50,
+    height: 50,
+    resizeMode: "contain",
+    // backgroundColor: "black",
+  },
   logoDot: { width: 14, height: 14, borderRadius: 7, backgroundColor: PINK },
-  title: { fontSize: 18, fontWeight: "800" },
+  title: { fontSize: 18, fontWeight: "800", color: "#ff2d7a" },
   storyCircle: {
     width: 58,
     height: 58,

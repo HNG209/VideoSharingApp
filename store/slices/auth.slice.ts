@@ -1,9 +1,41 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { LoginValues, User } from "../../types/user";
 import {
+  checkAuthService,
   loginUserService,
   logoutUserService,
+  testAuthService,
 } from "../../services/user.service";
+
+export const checkAuth = createAsyncThunk(
+  "auth/checkAuth",
+  async (_, thunkAPI) => {
+    try {
+      const response = await checkAuthService();
+
+      return response; // user info
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Token không hợp lệ"
+      );
+    }
+  }
+);
+
+export const testAuth = createAsyncThunk(
+  "auth/testAuth",
+  async (_, thunkAPI) => {
+    try {
+      const response = await testAuthService();
+
+      return response; // user info
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || "Token không hợp lệ"
+      );
+    }
+  }
+);
 
 export const login = createAsyncThunk<User, LoginValues>(
   "auth/login",
@@ -25,11 +57,13 @@ export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
 });
 
 interface AuthState {
+  status: "pending" | "loading" | "success" | "error";
   isLoggedIn: boolean;
   user: User | null;
 }
 
 const initialState: AuthState = {
+  status: "pending",
   isLoggedIn: false,
   user: null,
 };
@@ -40,6 +74,26 @@ const authSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      .addCase(checkAuth.pending, (state: AuthState) => {
+        state.status = "loading";
+        state.isLoggedIn = false;
+        state.user = null;
+      })
+      .addCase(checkAuth.fulfilled, (state: AuthState, action) => {
+        state.status = "success";
+        state.isLoggedIn = true;
+        state.user = action.payload;
+      })
+      .addCase(checkAuth.rejected, (state: AuthState, action) => {
+        state.status = "error";
+        state.isLoggedIn = false;
+        state.user = null;
+      })
+
+      .addCase(testAuth.fulfilled, (state: AuthState, action) => {
+        console.log("test auth done");
+      })
+
       .addCase(
         login.fulfilled,
         (state: AuthState, action: PayloadAction<User>) => {

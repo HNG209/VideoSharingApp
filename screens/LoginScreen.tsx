@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
 } from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -40,6 +41,7 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* <Image source={require("../assets/logo.png")} style={styles.logo} /> */}
       <Text style={styles.title}>Đăng nhập</Text>
 
       <Formik
@@ -107,10 +109,17 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
   },
+  logo: {
+    width: 100,
+    height: 100,
+    alignSelf: "center",
+    marginBottom: 20,
+  },
   title: {
     fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
+    color: "#ff2d7a",
     marginBottom: 30,
   },
   input: {
@@ -128,12 +137,12 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
   },
   button: {
-    backgroundColor: "#000",
+    backgroundColor: "#ff2d7a",
     padding: 14,
     borderRadius: 10,
     marginTop: 10,
   },
   buttonText: { color: "#fff", textAlign: "center", fontWeight: "600" },
-  link: { color: "#1e90ff", marginTop: 15, textAlign: "center" },
+  link: { color: "#ff2d7a", marginTop: 15, textAlign: "center" },
   error: { color: "red", fontSize: 13 },
 });

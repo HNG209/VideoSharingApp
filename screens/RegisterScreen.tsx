@@ -138,6 +138,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "bold",
     textAlign: "center",
+    color: "#ff2d7a",
     marginBottom: 30,
   },
   input: {
@@ -148,13 +149,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   button: {
-    backgroundColor: "#000",
+    backgroundColor: "#ff2d7a",
     padding: 14,
     borderRadius: 10,
     marginTop: 10,
   },
   buttonText: { color: "#fff", textAlign: "center", fontWeight: "600" },
-  link: { color: "#1e90ff", marginTop: 15, textAlign: "center" },
+  link: { color: "#ff2d7a", marginTop: 15, textAlign: "center" },
   error: { color: "red", fontSize: 13 },
   inputError: {
     borderColor: "#ff4d4f",

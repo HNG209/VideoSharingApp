@@ -2,6 +2,7 @@ import axios from "axios";
 import * as Keychain from "react-native-keychain";
 import TokenService from "./token.service";
 import { BASE_URL } from "../types/path";
+import { refreshTokenService } from "./user.service";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL || "http://192.168.1.6:5000/api",
@@ -26,31 +27,15 @@ axiosInstance.interceptors.request.use(async (config) => {
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
-    // console.log("axiosInstance error response:", error.response.data.message);
     const originalRequest = error.config;
 
     if (error.response?.status === 403 && !originalRequest._retry) {
+      console.log("expired!");
       originalRequest._retry = true;
 
       try {
-        const refreshToken = await TokenService.getRefreshToken();
-        if (!refreshToken) throw new Error("No tokens found");
-
-        const response = await axios.post(`${BASE_URL}/users/refresh`, {
-          refreshToken,
-        });
-
-        const newAccessToken = response.data.accessToken;
-        const newTokens = {
-          accessToken: newAccessToken,
-          refreshToken,
-        };
-
-        // Lưu lại token mới vào SecureStore
-        await TokenService.saveTokens(newAccessToken, refreshToken);
-
-        // Cập nhật redux
-        // store.dispatch(login());
+        // Lấy access token mới
+        const newAccessToken = await refreshTokenService();
 
         // Gửi lại request cũ
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
@@ -58,9 +43,9 @@ axiosInstance.interceptors.response.use(
       } catch (err) {
         // Refresh token lỗi → logout
         await Keychain.resetGenericPassword();
-        // store.dispatch(logout());
       }
     }
+
     // Chuẩn hóa lỗi từ backend
     if (error.response?.data?.message) {
       return Promise.reject(new Error(error.response.data.message));

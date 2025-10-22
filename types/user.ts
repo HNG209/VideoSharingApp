@@ -3,7 +3,12 @@ export interface User {
   username: string;
   name: string | null;
   email: string;
-  // avatar: string;
+  profile: {
+    firstName: string;
+    lastName: string;
+    bio: string;
+    avatar: string;
+  };
 }
 
 export interface LoginValues {

@@ -2,6 +2,41 @@ import { LoginValues, RegisterValues } from "../types/user";
 import axiosInstance from "./axiosInstance";
 import TokenService from "./token.service";
 
+export const refreshTokenService = async () => {
+  const refreshToken = await TokenService.getRefreshToken();
+  if (!refreshToken) throw new Error("No tokens found");
+
+  const response = await axiosInstance.post("/users/refresh", {
+    refreshToken,
+  });
+  const newAccessToken = response.data.result.accessToken;
+
+  await TokenService.saveTokens(newAccessToken, refreshToken);
+  return newAccessToken;
+};
+
+export const checkAuthService = async () => {
+  const accessToken = await TokenService.getAccessToken();
+  if (!accessToken) throw new Error("No token");
+
+  const response = await axiosInstance.get("/users/me", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  return response.data.result; // user info
+};
+
+export const testAuthService = async () => {
+  const accessToken = await TokenService.getAccessToken();
+  if (!accessToken) throw new Error("No token");
+
+  const response = await axiosInstance.get("/users/test", {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+
+  return response.data.result; // user info
+};
+
 export const registerUserService = async (registerValues: RegisterValues) => {
   const response = await axiosInstance.post("/users/register", {
     username: registerValues.username,
@@ -16,8 +51,8 @@ export const loginUserService = async (loginValues: LoginValues) => {
     username: loginValues.username,
     password: loginValues.password,
   });
-  console.log("Login response:", response.data.data.user);
-  const { accessToken, refreshToken, user } = response.data.data;
+  // console.log("Login response:", response.data.data.user);
+  const { accessToken, refreshToken, user } = response.data.result;
 
   // Lưu tokens vào SecureStore
   await TokenService.saveTokens(accessToken, refreshToken);
