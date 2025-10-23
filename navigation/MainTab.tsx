@@ -7,6 +7,7 @@ import SearchScreen from "../screens/SearchScreen";
 import FriendsScreen from "../screens/FriendsScreen";
 import { Ionicons } from "@expo/vector-icons";
 import ProfileStack from "./ProfileStack";
+import { ProfileDrawer } from "./ProfileDrawer";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
@@ -36,7 +37,7 @@ export const MainTab = () => {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="MyProfile" component={ProfileStack} />
+      <Tab.Screen name="MyProfile" component={ProfileDrawer} />
       {/* <Tab.Screen name="ProfileDetails" component={ProfileDetails} /> */}
       <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="Friends" component={FriendsScreen} />

@@ -27,3 +27,8 @@ export type MainTabParamList = {
   CreateVideo?: undefined;
   Detail: { id: string };
 };
+
+export type ProfileDrawerParamList = {
+  Profile: undefined;
+  ChangePassword: undefined;
+};

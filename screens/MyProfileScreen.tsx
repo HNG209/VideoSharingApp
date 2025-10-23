@@ -24,8 +24,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { checkAuth, testAuth } from "../store/slices/auth.slice";
+import { DrawerActions, useNavigation } from "@react-navigation/native";
 
-type Props = Partial<NativeStackScreenProps<ProfileStackParamList, "Profile">>;
+// type Props = Partial<NativeStackScreenProps<ProfileStackParamList, "Profile">>;
 type Media = { id: string; thumbnail: string; views?: string };
 
 const SCREEN_W = Dimensions.get("window").width;
@@ -42,9 +43,10 @@ type TabKey = (typeof TAB_KEYS)[number];
 
 const INDICATOR_W = 74;
 
-const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
+export default function MyProfileScreen() {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch<AppDispatch>();
+  const navigation = useNavigation<any>();
 
   const profile = useSelector((state: RootState) => state.auth.user);
 
@@ -160,9 +162,14 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
       {/* ===== Header ===== */}
       <View style={styles.headerRow}>
         <View style={styles.left}>
-          <Pressable onPress={() => {}} style={styles.iconBtn}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.dispatch(DrawerActions.openDrawer());
+            }}
+            style={styles.iconBtn}
+          >
             <Feather name="menu" size={24} color={ICON_GREY} />
-          </Pressable>
+          </TouchableOpacity>
           <Pressable onPress={() => {}} style={styles.iconBtn}>
             <Ionicons name="person-add-outline" size={22} color={ICON_GREY} />
           </Pressable>
@@ -303,9 +310,9 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
       />
     </View>
   );
-};
+}
 
-export default MyProfileScreen;
+// export default MyProfileScreen;
 
 /* ===== Small stat component ===== */
 const Stat = ({ number, label }: { number: string; label: string }) => (
