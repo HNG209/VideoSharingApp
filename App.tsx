@@ -1,14 +1,13 @@
-// App.tsx
-import React, { useEffect } from "react";
-import { Alert } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Provider, useDispatch, useSelector } from "react-redux";
-
-import store, { AppDispatch, RootState } from "./store/store";
 import AuthStack from "./navigation/AuthStack";
-import AppStack from "./navigation/AppStack";  
+import { Provider, useDispatch, useSelector } from "react-redux";
+import store, { AppDispatch, RootState } from "./store/store";
+import { MainTab } from "./navigation/MainTab";
+import { use, useEffect } from "react";
 import { checkAuth } from "./store/slices/auth.slice";
+import { Alert } from "react-native";
+import AppStack from "./navigation/AppStack";
 
 export default function App() {
   return (
@@ -21,24 +20,27 @@ export default function App() {
     </Provider>
   );
 }
+
 const RootNavigator = () => {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
   const dispatch = useDispatch<AppDispatch>();
 
+  // Check authentication status on app start 
+  // Kiểm tra phiên đăng nhập khi app khởi động
   useEffect(() => {
-    // trễ nhẹ để store/rehydrate xong (nếu có)
-    const t = setTimeout(() => {
-      dispatch(checkAuth())
-        .unwrap()
-        .catch(() => {
-          Alert.alert(
-            "Phiên đăng nhập đã hết hạn",
-            "Hãy đăng nhập lại vào tài khoản của bạn"
-          );
-        });
-    }, 300);
-    return () => clearTimeout(t);
+    try {
+      // console.log("Checking auth");
+      setTimeout(() => {
+        dispatch(checkAuth()).unwrap();
+      }, 1000);
+    } catch (error) {
+      Alert.alert(
+        "Phiên đăng nhập đã hết hạn",
+        "Hãy đăng nhập lại vào tài khoản của bạn"
+      );
+      console.error("Failed to check auth:", error);
+    }
   }, [dispatch]);
 
-  return isLoggedIn ? <AppStack /> : <AuthStack />;
+  return <>{isLoggedIn ? <MainTab /> : <AuthStack />}</>;
 };
