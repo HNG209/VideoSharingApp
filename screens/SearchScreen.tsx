@@ -1,4 +1,3 @@
-// src/screens/SearchScreen.tsx
 import React, { memo, useMemo, useRef, useState } from "react";
 import {
   View,
@@ -9,13 +8,13 @@ import {
   FlatList,
   Image,
   Dimensions,
-  Animated,
   ScrollView,
+  LayoutChangeEvent,
+  Platform,
 } from "react-native";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AppStackParamList } from "../types/navigation";
-import BottomBar, { BottomKey } from "../components/ProfileDetails/BottomBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Props = Partial<NativeStackScreenProps<AppStackParamList, "Search">>;
@@ -27,9 +26,9 @@ const { width } = Dimensions.get("window");
 const TABS = ["Trending", "Accounts", "Streaming", "Audio"] as const;
 type TabKey = (typeof TABS)[number];
 
-/* =======================
-   Sub Components
-======================= */
+/* ----------------------
+   Sub components (unchanged)
+   ---------------------- */
 
 type Card = {
   id: string;
@@ -77,10 +76,7 @@ const TrendingGrid = memo(function TrendingGrid({
         {item.title}
       </Text>
       <View style={styles.authorRow}>
-        <Image
-          source={{ uri: item.authorAvatar }}
-          style={styles.authorAvatar}
-        />
+        <Image source={{ uri: item.authorAvatar }} style={styles.authorAvatar} />
         <Text style={styles.authorName}>{item.author}</Text>
       </View>
     </Pressable>
@@ -109,9 +105,9 @@ type Account = {
 const AccountsList = memo(function AccountsList({ data }: { data: Account[] }) {
   const renderItem = ({ item }: { item: Account }) => (
     <View style={styles.accRow}>
-      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Image source={{ uri: item.avatar }} style={styles.accAvatar} />
-        <View>
+        <View style={{ marginLeft: 12 }}>
           <Text style={styles.accName}>{item.name}</Text>
           <Text style={styles.accSub}>{item.followers} followers</Text>
         </View>
@@ -212,39 +208,15 @@ const AudioList = memo(function AudioList({ data }: { data: Track[] }) {
 });
 
 /* =======================
-   Main Screen
+   Main Screen (header fixed, content scrolls under)
+   - Search + Tabs are both fixed (header outside ScrollView)
+   - ScrollView content is padded by measured headerHeight so it does NOT appear under header
 ======================= */
 
 const SearchScreen: React.FC<Props> = ({ navigation }) => {
   const [query, setQuery] = useState("");
   const [activeTab, setActiveTab] = useState<TabKey>("Trending");
   const insets = useSafeAreaInsets();
-
-  // indicator for tabs
-  const xVals = useRef<number[]>(new Array(TABS.length).fill(0)).current;
-  const wVals = useRef<number[]>(new Array(TABS.length).fill(0)).current;
-  const indX = useRef(new Animated.Value(0)).current;
-  const indW = useRef(new Animated.Value(0)).current;
-
-  const moveIndicator = (idx: number) => {
-    Animated.parallel([
-      Animated.timing(indX, {
-        toValue: xVals[idx],
-        duration: 160,
-        useNativeDriver: false,
-      }),
-      Animated.timing(indW, {
-        toValue: wVals[idx],
-        duration: 160,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  };
-
-  const onPressTab = (key: TabKey, idx: number) => {
-    setActiveTab(key);
-    moveIndicator(idx);
-  };
 
   // mock data
   const cards: Card[] = useMemo(
@@ -316,6 +288,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
     []
   );
 
+  // FILTER theo ô tìm kiếm
   const filteredCards = cards.filter((c) =>
     `${c.title} ${c.author}`.toLowerCase().includes(query.toLowerCase())
   );
@@ -330,63 +303,70 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   const chips = useMemo(
-    () => [
-      "Funny momments of pet",
-      "Cats",
-      "Dogs",
-      "Foods for pet",
-      "Vet center",
-    ],
+    () => ["Funny momments of pet", "Cats", "Dogs", "Foods for pet", "Vet center"],
     []
   );
 
-  return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 96 }}
-        showsVerticalScrollIndicator={false}
-      >
-        
+  // measure header height so content starts below it
+  const [headerHeight, setHeaderHeight] = useState<number>(0);
+  const onHeaderLayout = (e: LayoutChangeEvent) => {
+    const h = e.nativeEvent.layout.height;
+    setHeaderHeight(h);
+    // debug: console.log("headerHeight", h);
+  };
 
-        {/* Tabs */}
+  return (
+    <View style={styles.container}>
+      {/* Header fixed: placed OUTSIDE ScrollView so it NEVER scrolls */}
+      <View
+        style={[
+          styles.headerWrap,
+          { top: 0, left: 0, right: 0, paddingTop: insets.top },
+        ]}
+        onLayout={onHeaderLayout}
+      >
+        {/* Search box (fixed) */}
+        <View style={styles.searchRow}>
+          <View style={styles.searchBox}>
+            <Feather name="search" size={18} color={GREY} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search"
+              placeholderTextColor="#B0B0B0"
+              style={styles.input}
+              returnKeyType="search"
+            />
+          </View>
+        </View>
+
+        {/* Tabs (fixed) */}
         <View style={styles.tabsWrap}>
           <View style={styles.tabsRow}>
-            {TABS.map((t, i) => {
+            {TABS.map((t) => {
               const active = t === activeTab;
               return (
                 <Pressable
                   key={t}
                   style={[styles.tabItem, active && styles.tabActive]}
-                  onLayout={(e) => {
-                    xVals[i] = e.nativeEvent.layout.x;
-                    wVals[i] = e.nativeEvent.layout.width;
-                    if (active) {
-                      indX.setValue(xVals[i]);
-                      indW.setValue(wVals[i]);
-                    }
-                  }}
-                  onPress={() => onPressTab(t, i)}
+                  onPress={() => setActiveTab(t)}
                 >
-                  <Text style={[styles.tabText, active && { color: "#fff" }]}>
-                    {t}
-                  </Text>
+                  <Text style={[styles.tabText, active && { color: "#fff" }]}>{t}</Text>
                 </Pressable>
               );
             })}
           </View>
-          <Animated.View
-            pointerEvents="none"
-            style={[
-              styles.indicator,
-              {
-                transform: [{ translateX: indX }],
-                width: indW,
-              },
-            ]}
-          />
         </View>
+      </View>
 
-        {/* CONTENT: hiển thị component theo tab */}
+      {/* Scrollable content: padded by headerHeight so it does not go under the fixed header */}
+      <ScrollView
+        contentContainerStyle={{
+          paddingTop: headerHeight || 160, // fallback until measured
+          paddingBottom: 96,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         {activeTab === "Trending" && (
           <TrendingGrid
             data={filteredCards}
@@ -395,8 +375,11 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
             }
           />
         )}
+
         {activeTab === "Accounts" && <AccountsList data={filteredAccounts} />}
+
         {activeTab === "Streaming" && <StreamingGrid data={filteredLives} />}
+
         {activeTab === "Audio" && <AudioList data={filteredTracks} />}
 
         {/* Chips gợi ý */}
@@ -407,7 +390,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={styles.chipText}>{c}</Text>
             </Pressable>
           ))}
-        </View> 
+        </View>
       </ScrollView>
     </View>
   );
@@ -421,65 +404,61 @@ export default SearchScreen;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
-  // search
-  fixedHeader: {
-  paddingHorizontal: 16,
-  paddingBottom: 12,
-},
+  headerWrap: {
+    position: "absolute",
+    zIndex: 100,
+    backgroundColor: "#fff",
+    // make header appear above content on Android/iOS
+    ...Platform.select({
+      android: { elevation: 6 },
+      ios: {
+        shadowColor: "#000",
+        shadowOpacity: 0.06,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+      },
+    }),
+  },
 
+  // Search (fixed)
   searchRow: {
     flexDirection: "row",
-    paddingHorizontal: 16,
     alignItems: "center",
-    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: "#fff",
   },
   searchBox: {
     flex: 1,
-    height: 38,
-    paddingHorizontal: 10,
-    borderRadius: 10,
+    minHeight: 40,
+    paddingHorizontal: 12,
+    borderRadius: 12,
     backgroundColor: "#f4f5f7",
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
   },
   input: { flex: 1, fontSize: 15, paddingVertical: 8, color: "#222" },
-  filterBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: "#f4f5f7",
-    alignItems: "center",
-    justifyContent: "center",
-  },
 
-  // tabs
+  // Tabs (fixed)
   tabsWrap: {
-    marginTop: 16,
-    paddingHorizontal: 16,
-    position: "relative",
-    marginBottom: 12,
+    backgroundColor: "#fff",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderBottomColor: "#f0f0f0",
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  tabsRow: { flexDirection: "row", gap: 10 },
+  tabsRow: { flexDirection: "row" },
   tabItem: {
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 18,
     backgroundColor: "#f6f6f8",
+    marginRight: 10,
   },
   tabActive: { backgroundColor: PINK },
   tabText: { fontWeight: "700", color: "#7a7a7d" },
-  indicator: {
-    position: "absolute",
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: PINK,
-    left: 16,
-    top: 0,
-    opacity: 0.18,
-  },
 
-  // grid/trending
+  // Cards/grid
   card: { borderRadius: 10 },
   posterWrap: {
     height: 200,

@@ -11,22 +11,17 @@ import {
   Pressable,
   Animated,
   LayoutChangeEvent,
-  AppState,
   TouchableOpacity,
 } from "react-native";
-import { Feather, Ionicons } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
 import type { ReactElement } from "react";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { AppStackParamList, ProfileStackParamList } from "../types/navigation";
 import VideoCard from "../components/VideoCard";
 import BottomBar, { BottomKey } from "../components/ProfileDetails/BottomBar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
-import { checkAuth, testAuth } from "../store/slices/auth.slice";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
 
-// type Props = Partial<NativeStackScreenProps<ProfileStackParamList, "Profile">>;
 type Media = { id: string; thumbnail: string; views?: string };
 
 const SCREEN_W = Dimensions.get("window").width;
@@ -156,6 +151,25 @@ export default function MyProfileScreen() {
     pagerRef.current?.scrollToIndex({ index, animated: true });
   };
 
+  // --- FIX: compute counts safely and coerce to string ---
+  // Use explicit lookup order, avoid chaining that confuses TS/linters.
+  const followingRaw =
+    (profile && (profile.profile as any)?.followingCount) ??
+    (profile && (profile as any).following) ??
+    203;
+  const followerRaw =
+    (profile && (profile.profile as any)?.followers) ??
+    (profile && (profile as any).followers) ??
+    628;
+  const likeRaw =
+    (profile && (profile.profile as any)?.likes) ??
+    (profile && (profile as any).likes) ??
+    2634;
+
+  const followingCount = String(followingRaw);
+  const followerCount = String(followerRaw);
+  const likeCount = String(likeRaw);
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* ===== Header ===== */}
@@ -171,15 +185,8 @@ export default function MyProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
-          onPress={() => {
-            navigation?.navigate("EditProfile");
-          }}
-          style={styles.editWrap}
-        >
-          <Feather name="edit-2" size={14} color={PINK} />
-          <Text style={styles.editText}> Edit Profile</Text>
-        </TouchableOpacity>
+        {/* removed Edit button from top-right header to place it under profile info */}
+        <View style={{ width: 44 }} />
       </View>
 
       {/* ===== Profile info ===== */}
@@ -189,18 +196,38 @@ export default function MyProfileScreen() {
           style={styles.avatar}
         />
         <Text style={styles.name}>
-          {profile?.profile.displayName || profile?.username}
+          {profile?.profile?.displayName || profile?.username || "Vinh"}
         </Text>
-        <Text style={styles.username}>{"@" + profile?.username}</Text>
+        <Text style={styles.username}>{"@" + (profile?.username || "Vinh")}</Text>
 
+        {/* Move Edit Profile button here, under username */}
+        <Pressable
+          style={styles.editButton}
+          onPress={() => navigation?.navigate?.("EditProfile")}
+        >
+          <Feather name="edit-2" size={14} color={PINK} />
+          <Text style={styles.editButtonText}> Edit Profile</Text>
+        </Pressable>
+
+        {/* ===== Stats row (three items) - moved down and centered ===== */}
         <View style={styles.statsRow}>
-          <Stat number="203" label="Following" />
-          <Stat number="628" label="Followers" />
-          <Stat number="2634" label="Like" />
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{followingCount}</Text>
+            <Text style={styles.statLabel}>Following</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{followerCount}</Text>
+            <Text style={styles.statLabel}>Followers</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{likeCount}</Text>
+            <Text style={styles.statLabel}>Like</Text>
+          </View>
         </View>
+
         <Text style={styles.bio}>{profile?.profile?.bio}</Text>
 
-        {/* ===== Tabs + Animated indicator ===== */}
+        {/* ===== Tabs + Animated indicator =====*/}
         <View style={styles.tabsWrap}>
           <View style={styles.tabs}>
             {TAB_KEYS.map((t, i) => {
@@ -257,7 +284,6 @@ export default function MyProfileScreen() {
               {
                 width: INDICATOR_W,
                 transform: [{ translateX }],
-                // opacity: measured ? 1 : 0,
               },
             ]}
           />
@@ -309,16 +335,6 @@ export default function MyProfileScreen() {
   );
 }
 
-// export default MyProfileScreen;
-
-/* ===== Small stat component ===== */
-const Stat = ({ number, label }: { number: string; label: string }) => (
-  <View style={{ alignItems: "center" }}>
-    <Text style={{ fontWeight: "700", fontSize: 18 }}>{number}</Text>
-    <Text style={{ color: "#888" }}>{label}</Text>
-  </View>
-);
-
 /* ===== Styles ===== */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
@@ -329,7 +345,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#666",
     textAlign: "center",
-    marginVertical: 8,
+    marginTop: 2,
   },
 
   // bio
@@ -350,18 +366,46 @@ const styles = StyleSheet.create({
   },
   left: { flexDirection: "row", alignItems: "center", gap: 16 },
   iconBtn: { padding: 6 },
-  editWrap: { flexDirection: "row", alignItems: "center" },
-  editText: { color: PINK, fontWeight: "600", fontSize: 14 },
 
-  // profile
+  // edit (moved below username)
+  editButton: {
+    flexDirection: "row", 
+    alignItems: "center",
+    marginTop: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 18,
+    backgroundColor: "#fff",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#f0a1be10",
+  },
+  editButtonText: { color: PINK, fontWeight: "600", fontSize: 14 },
+
   headerCenter: { alignItems: "center", paddingVertical: 12 },
   avatar: { width: 88, height: 88, borderRadius: 44, marginVertical: 10 },
-  name: { fontSize: 22, fontWeight: "700" },
+  name: { fontSize: 22, fontWeight: "800", textAlign: "center" },
+
+  // stats row: keep three stats, moved slightly down and centered
   statsRow: {
     marginTop: 10,
-    width: "70%",
+    width: "80%",
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+    alignSelf: "center",
+  },
+  statItem: { alignItems: "center", width: "33%" },
+  statNumber: {
+    fontSize: 16, 
+    fontWeight: "800",
+    color: "#000",
+    textAlign: "center",
+  },
+  statLabel: {
+    marginTop: 2,
+    fontSize: 13,
+    color: "#8b97a8",
+    textAlign: "center",
   },
 
   // tabs + indicator
@@ -383,7 +427,6 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     alignSelf: "flex-start",
     marginTop: 8,
-    // marginLeft: 16,
   },
 
   // list

@@ -75,9 +75,6 @@ const FriendsScreen: React.FC<Props> = ({ navigation }) => {
           <Pressable style={[styles.btn, styles.btnPrimary]}>
             <Text style={styles.btnPrimaryText}>Accept</Text>
           </Pressable>
-          {/* <Pressable style={[styles.btn, styles.btnGhost]}>
-            <Text style={styles.btnGhostText}>Decline</Text>
-          </Pressable> */}
         </View>
       );
     }
