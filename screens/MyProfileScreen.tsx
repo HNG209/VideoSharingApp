@@ -47,7 +47,6 @@ export default function MyProfileScreen() {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch<AppDispatch>();
   const navigation = useNavigation<any>();
-
   const profile = useSelector((state: RootState) => state.auth.user);
 
   // ===== Mock data =====
@@ -170,9 +169,6 @@ export default function MyProfileScreen() {
           >
             <Feather name="menu" size={24} color={ICON_GREY} />
           </TouchableOpacity>
-          <Pressable onPress={() => {}} style={styles.iconBtn}>
-            <Ionicons name="person-add-outline" size={22} color={ICON_GREY} />
-          </Pressable>
         </View>
 
         <TouchableOpacity
@@ -261,6 +257,7 @@ export default function MyProfileScreen() {
               {
                 width: INDICATOR_W,
                 transform: [{ translateX }],
+                // opacity: measured ? 1 : 0,
               },
             ]}
           />
@@ -386,7 +383,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     alignSelf: "flex-start",
     marginTop: 8,
-    marginLeft: 16,
+    // marginLeft: 16,
   },
 
   // list

@@ -346,28 +346,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
         contentContainerStyle={{ paddingBottom: 96 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Search bar */}
-        <View style={styles.searchRow}>
-          <View style={styles.searchBox}>
-            <Feather name="search" size={18} color={GREY} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Search"
-              placeholderTextColor="#B0B0B0"
-              style={styles.input}
-              returnKeyType="search"
-            />
-            {query.length > 0 && (
-              <Pressable onPress={() => setQuery("")} style={{ padding: 4 }}>
-                <Ionicons name="close-circle" size={18} color="#C8C8CD" />
-              </Pressable>
-            )}
-          </View>
-          <Pressable style={styles.filterBtn}>
-            <Feather name="sliders" size={18} color={GREY} />
-          </Pressable>
-        </View>
+        
 
         {/* Tabs */}
         <View style={styles.tabsWrap}>
@@ -428,7 +407,7 @@ const SearchScreen: React.FC<Props> = ({ navigation }) => {
               <Text style={styles.chipText}>{c}</Text>
             </Pressable>
           ))}
-        </View>
+        </View> 
       </ScrollView>
     </View>
   );
@@ -443,6 +422,11 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
 
   // search
+  fixedHeader: {
+  paddingHorizontal: 16,
+  paddingBottom: 12,
+},
+
   searchRow: {
     flexDirection: "row",
     paddingHorizontal: 16,

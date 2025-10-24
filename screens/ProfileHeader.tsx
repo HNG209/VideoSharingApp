@@ -24,15 +24,6 @@ const ProfileHeader: React.FC<Props> = ({ onMenu, onAddFriend, onEditProfile }) 
         >
           <Feather name="menu" size={24} color={ICON_GREY} />
         </Pressable>
-
-        <Pressable
-          onPress={onAddFriend}
-          style={styles.iconBtn}
-          hitSlop={10}
-          android_ripple={{ color: "#eee", borderless: true }}
-        >
-          <Ionicons name="person-add-outline" size={22} color={ICON_GREY} />
-        </Pressable>
       </View>
 
       {/* right: edit profile */}

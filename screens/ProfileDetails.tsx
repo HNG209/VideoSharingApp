@@ -23,9 +23,7 @@ import SuggestCard, { Suggest } from "../components/ProfileDetails/SuggestCard";
 import VideoCard from "../components/VideoCard";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type Props = Partial<
-  NativeStackScreenProps<AppStackParamList, "ProfileDetails">
->;
+type Props = Partial<NativeStackScreenProps<AppStackParamList, "ProfileDetails">>;
 type Media = { id: string; thumbnail: string; views?: string };
 
 const { width: SCREEN_W } = Dimensions.get("window");
@@ -65,25 +63,11 @@ export default function ProfileDetails({ navigation }: Props) {
   );
 
   const suggests: Suggest[] = useMemo(() => {
-    const names = [
-      "Vinh",
-      "Hưng",
-      "Tài",
-      "Lan",
-      "Minh",
-      "Thảo",
-      "Tuấn",
-      "My",
-      "Dũng",
-      "Phúc",
-    ];
-    const total = 10;
-    return Array.from({ length: total }).map((_, i) => ({
+    const names = ["Vinh", "Hưng", "Tài", "Lan", "Minh", "Thảo", "Tuấn", "My", "Dũng", "Phúc"];
+    return Array.from({ length: 10 }).map((_, i) => ({
       id: `s${i + 1}`,
       name: names[i % names.length],
-      avatar: `https://i.pravatar.cc/100?img=${
-        Math.floor(Math.random() * 70) + 1
-      }`, // random 1–70
+      avatar: `https://i.pravatar.cc/100?img=${Math.floor(Math.random() * 70) + 1}`,
     }));
   }, []);
 
@@ -104,9 +88,7 @@ export default function ProfileDetails({ navigation }: Props) {
   const pagerRef = useRef<FlatList>(null);
 
   // đo layout từng tab để canh indicator
-  const [tabLayouts, setTabLayouts] = useState<
-    Array<{ x: number; width: number }>
-  >([
+  const [tabLayouts, setTabLayouts] = useState<Array<{ x: number; width: number }>>([
     { x: 0, width: INDICATOR_W },
     { x: 0, width: INDICATOR_W },
   ]);
@@ -125,15 +107,18 @@ export default function ProfileDetails({ navigation }: Props) {
   const inputRange = PAGES.map((_, i) => i * SCREEN_W);
   const centers = tabLayouts.map((t) => t.x + t.width / 2);
   const fallbackCenters = [SCREEN_W / 2 - 60, SCREEN_W / 2 + 60];
-  const outputRange = centers.every((c) => c > 0)
-    ? centers.map((c) => c - INDICATOR_W / 2)
-    : fallbackCenters.map((c) => c - INDICATOR_W / 2);
+  const outputRange =
+    centers.every((c) => c > 0)
+      ? centers.map((c) => c - INDICATOR_W / 2)
+      : fallbackCenters.map((c) => c - INDICATOR_W / 2);
 
   const translateX = scrollX.interpolate({
     inputRange,
     outputRange,
     extrapolate: "clamp",
   });
+
+  const measured = tabLayouts.every((t) => t.width > 0);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -158,185 +143,123 @@ export default function ProfileDetails({ navigation }: Props) {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fff", paddingTop: insets.top }}>
-      {/* Header */}
+      {/* ===== Fixed header (không cuộn) ===== */}
       <HeaderBar
         actions={[
-          {
-            side: "left",
-            key: "back",
-            icon: HIcons.back(),
-            onPress: () => navigation?.goBack?.(),
-          },
+          { side: "left", key: "back", icon: HIcons.back(), onPress: () => navigation?.goBack?.() },
           { side: "right", key: "bell", icon: HIcons.bell() },
           { side: "right", key: "more", icon: HIcons.more() },
         ]}
       />
 
-      <FlatList
-        ListHeaderComponent={
-          <>
-            {/* top user block */}
-            <View style={styles.top}>
-              <View style={styles.avatarWrap}>
-                <Image
-                  source={{ uri: "https://i.pravatar.cc/200?img=5" }}
-                  style={styles.avatar}
-                />
-              </View>
-              <Text style={styles.name}>Kiran Glaucus</Text>
-              <Text style={styles.bio}>I love a colorful life ❤️❤️❤️</Text>
+      {/* ===== Fixed top profile block (không cuộn) ===== */}
+      <View style={styles.top}>
+        <View style={styles.avatarWrap}>
+          <Image source={{ uri: "https://i.pravatar.cc/200?img=5" }} style={styles.avatar} />
+        </View>
+        <Text style={styles.name}>Kiran Glaucus</Text>
+        <Text style={styles.bio}>I love a colorful life ❤️❤️❤️</Text>
 
-              <StatsTriplet
-                items={[
-                  { num: "203", label: "Following" },
-                  { num: "628", label: "Followers" },
-                  { num: "2634", label: "Likes" },
-                ]}
-              />
+        <StatsTriplet
+          items={[
+            { num: "203", label: "Following" },
+            { num: "628", label: "Followers" },
+            { num: "2634", label: "Likes" },
+          ]}
+        />
 
-              <View style={styles.actions}>
-                <View style={[styles.btn, { backgroundColor: PINK }]}>
-                  <Text style={{ color: "#fff", fontWeight: "700" }}>
-                    Follow
-                  </Text>
-                </View>
-                <View style={[styles.btn, { backgroundColor: "#ffe6ef" }]}>
-                  <Text style={{ color: PINK, fontWeight: "700" }}>
-                    Message
-                  </Text>
-                </View>
-              </View>
+        <View style={styles.actions}>
+          <View style={[styles.btn, { backgroundColor: PINK }]}>
+            <Text style={{ color: "#fff", fontWeight: "700" }}>Follow</Text>
+          </View>
+          <View style={[styles.btn, { backgroundColor: "#ffe6ef" }]}>
+            <Text style={{ color: PINK, fontWeight: "700" }}>Message</Text>
+          </View>
+        </View>
 
-              {/* suggested accounts */}
-              <View style={styles.suggestHeader}>
-                <Text style={{ fontWeight: "700" }}>Suggested accounts</Text>
-                <Pressable hitSlop={8} onPress={() => {}}>
-                  <Text style={{ color: PINK, fontWeight: "600" }}>
-                    View more
-                  </Text>
+        {/* Suggested accounts (ngang, không cuộn theo trang dưới) */}
+        <View style={styles.suggestHeader}>
+          <Text style={{ fontWeight: "700" }}>Suggested accounts</Text>
+          <Pressable hitSlop={8} onPress={() => {}}>
+            <Text style={{ color: PINK, fontWeight: "600" }}>View more</Text>
+          </Pressable>
+        </View>
+
+        <FlatList
+          data={suggests}
+          keyExtractor={(i) => i.id}
+          renderItem={({ item }) => <SuggestCard item={item} onClose={() => {}} onFollow={() => {}} />}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 14 }}
+          style={{ marginBottom: 8 }}
+        />
+
+        {/* Tabs + indicator (cố định) */}
+        <View style={styles.tabsWrap}>
+          <View style={styles.tabs}>
+            {TAB_KEYS.map((t, i) => {
+              const active = t === tab;
+              const icon =
+                t === "Videos" ? (
+                  <Feather name="play" size={16} color={active ? PINK : GREY} />
+                ) : (
+                  <Feather name="heart" size={16} color={active ? PINK : GREY} />
+                );
+              return (
+                <Pressable key={t} onPress={() => onPressTab(t)} style={styles.tab} onLayout={onTabLayout(i)}>
+                  <View style={styles.tabContent}>
+                    {icon}
+                    <Text style={[styles.tabText, active && styles.tabTextActive]}>{t}</Text>
+                  </View>
                 </Pressable>
-              </View>
-
-              <FlatList
-                data={suggests}
-                keyExtractor={(i) => i.id}
-                renderItem={({ item }) => (
-                  <SuggestCard
-                    item={item}
-                    onClose={() => {}}
-                    onFollow={() => {}}
-                  />
-                )}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 16, gap: 14 }}
-                style={{ marginBottom: 8 }}
-              />
-
-              {/* tabs with icons + animated indicator */}
-              <View style={styles.tabsWrap}>
-                <View style={styles.tabs}>
-                  {TAB_KEYS.map((t, i) => {
-                    const active = t === tab;
-                    const icon =
-                      t === "Videos" ? (
-                        <Feather
-                          name="play"
-                          size={16}
-                          color={active ? PINK : GREY}
-                        />
-                      ) : (
-                        <Feather
-                          name="heart"
-                          size={16}
-                          color={active ? PINK : GREY}
-                        />
-                      );
-                    return (
-                      <Pressable
-                        key={t}
-                        onPress={() => onPressTab(t)}
-                        style={styles.tab}
-                        onLayout={onTabLayout(i)}
-                      >
-                        <View style={styles.tabContent}>
-                          {icon}
-                          <Text
-                            style={[
-                              styles.tabText,
-                              active && styles.tabTextActive,
-                            ]}
-                          >
-                            {t}
-                          </Text>
-                        </View>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-
-                <Animated.View
-                  style={[
-                    styles.indicator,
-                    { width: INDICATOR_W, transform: [{ translateX }] },
-                  ]}
-                />
-              </View>
-            </View>
-          </>
-        }
-        data={[0]}
-        keyExtractor={() => "pager"}
-        renderItem={() => (
-          <Animated.FlatList
-            ref={pagerRef}
-            data={PAGES}
-            keyExtractor={(i) => i.key}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            getItemLayout={(_, index) => ({
-              length: SCREEN_W,
-              offset: SCREEN_W * index,
-              index,
-            })}
-            onMomentumScrollEnd={(e) => {
-              const index = Math.round(
-                e.nativeEvent.contentOffset.x / SCREEN_W
               );
-              setTab(PAGES[index].key);
-            }}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: false }
-            )}
-            renderItem={({ item }) => (
-              <View style={{ width: SCREEN_W }}>
-                <FlatList
-                  data={item.data}
-                  numColumns={COLS}
-                  keyExtractor={(it) => it.id}
-                  renderItem={renderGridItem}
-                  contentContainerStyle={{
-                    paddingHorizontal: GUTTER,
-                    paddingBottom: 24,
-                  }}
-                  columnWrapperStyle={{ gap: GUTTER }}
-                  ItemSeparatorComponent={() => (
-                    <View style={{ height: GUTTER }} />
-                  )}
-                  refreshControl={
-                    <RefreshControl
-                      refreshing={refreshing}
-                      onRefresh={onRefresh}
-                    />
-                  }
-                />
-              </View>
-            )}
-          />
-        )}
-      />
+            })}
+            {/* Indicator căn giữa, tuyệt đối, không bị lệch */}
+            <Animated.View
+              style={[
+                styles.indicator,
+                { width: INDICATOR_W, transform: [{ translateX }], opacity: measured ? 1 : 0 },
+              ]}
+            />
+          </View>
+        </View>
+      </View>
+
+      {/* ===== Pager (cuộn ngang) + từng grid (cuộn dọc) — chỉ phần này cuộn ===== */}
+      <View style={{ flex: 1 }}>
+        <Animated.FlatList
+          ref={pagerRef}
+          data={PAGES}
+          keyExtractor={(i) => i.key}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          getItemLayout={(_, index) => ({ length: SCREEN_W, offset: SCREEN_W * index, index })}
+          onMomentumScrollEnd={(e) => {
+            const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W);
+            setTab(PAGES[index].key);
+          }}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+            useNativeDriver: false,
+          })}
+          renderItem={({ item }) => (
+            <View style={{ width: SCREEN_W }}>
+              <FlatList
+                data={item.data}
+                numColumns={COLS}
+                keyExtractor={(it) => it.id}
+                renderItem={renderGridItem}
+                contentContainerStyle={{ paddingHorizontal: GUTTER, paddingBottom: 24 }}
+                columnWrapperStyle={{ gap: GUTTER }}
+                ItemSeparatorComponent={() => <View style={{ height: GUTTER }} />}
+                refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+                showsVerticalScrollIndicator={false}
+              />
+            </View>
+          )}
+        />
+      </View>
     </View>
   );
 }
@@ -391,20 +314,25 @@ const styles = StyleSheet.create({
 
   tabsWrap: { marginTop: 10, paddingBottom: 10 },
   tabs: {
+    position: "relative", // để indicator định vị tuyệt đối bên trong
     flexDirection: "row",
     justifyContent: "center",
     gap: 28,
     paddingHorizontal: 16,
+    alignItems: "center",
   },
   tab: { paddingVertical: 6 },
   tabContent: { flexDirection: "row", alignItems: "center", gap: 6 },
   tabText: { color: "#7a7a7a", fontWeight: "600" },
   tabTextActive: { color: PINK },
+
+  // Indicator tuyệt đối, không marginLeft → hết lệch
   indicator: {
+    position: "absolute",
+    left: 0,
+    bottom: -2, // hoặc 0 tuỳ gu
     height: 2,
     backgroundColor: PINK,
     borderRadius: 2,
-    marginTop: 6,
-    marginLeft: 16,
   },
 });
