@@ -10,6 +10,11 @@ export interface User {
   };
 }
 
+export interface ChangePasswordValues {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface LoginValues {
   username: string;
   password: string;

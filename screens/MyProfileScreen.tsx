@@ -21,6 +21,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { ProfileStackParamList } from "../types/navigation";
 
 type Media = { id: string; thumbnail: string; views?: string };
 
@@ -38,10 +40,12 @@ type TabKey = (typeof TAB_KEYS)[number];
 
 const INDICATOR_W = 74;
 
-export default function MyProfileScreen() {
+type Props = Partial<NativeStackScreenProps<ProfileStackParamList, "Profile">>;
+
+const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<any>();
+  // const navigation = useNavigation<any>();
   const profile = useSelector((state: RootState) => state.auth.user);
 
   // ===== Mock data =====
@@ -171,24 +175,7 @@ export default function MyProfileScreen() {
   const likeCount = String(likeRaw);
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* ===== Header ===== */}
-      <View style={styles.headerRow}>
-        <View style={styles.left}>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.dispatch(DrawerActions.openDrawer());
-            }}
-            style={styles.iconBtn}
-          >
-            <Feather name="menu" size={24} color={ICON_GREY} />
-          </TouchableOpacity>
-        </View>
-
-        {/* removed Edit button from top-right header to place it under profile info */}
-        <View style={{ width: 44 }} />
-      </View>
-
+    <View style={[styles.container]}>
       {/* ===== Profile info ===== */}
       <View style={styles.headerCenter}>
         <Image
@@ -198,7 +185,9 @@ export default function MyProfileScreen() {
         <Text style={styles.name}>
           {profile?.profile?.displayName || profile?.username || "Vinh"}
         </Text>
-        <Text style={styles.username}>{"@" + (profile?.username || "Vinh")}</Text>
+        <Text style={styles.username}>
+          {"@" + (profile?.username || "Vinh")}
+        </Text>
 
         {/* Move Edit Profile button here, under username */}
         <Pressable
@@ -335,6 +324,8 @@ export default function MyProfileScreen() {
   );
 }
 
+export default MyProfileScreen;
+
 /* ===== Styles ===== */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
@@ -369,7 +360,7 @@ const styles = StyleSheet.create({
 
   // edit (moved below username)
   editButton: {
-    flexDirection: "row", 
+    flexDirection: "row",
     alignItems: "center",
     marginTop: 8,
     paddingHorizontal: 12,
@@ -383,7 +374,7 @@ const styles = StyleSheet.create({
 
   headerCenter: { alignItems: "center", paddingVertical: 12 },
   avatar: { width: 88, height: 88, borderRadius: 44, marginVertical: 10 },
-  name: { fontSize: 22, fontWeight: "800", textAlign: "center" },
+  name: { fontSize: 20, fontWeight: "800", textAlign: "center" },
 
   // stats row: keep three stats, moved slightly down and centered
   statsRow: {
@@ -396,7 +387,7 @@ const styles = StyleSheet.create({
   },
   statItem: { alignItems: "center", width: "33%" },
   statNumber: {
-    fontSize: 16, 
+    fontSize: 16,
     fontWeight: "800",
     color: "#000",
     textAlign: "center",

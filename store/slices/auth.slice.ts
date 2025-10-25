@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { LoginValues, User } from "../../types/user";
+import { ChangePasswordValues, LoginValues, User } from "../../types/user";
 import {
+  changePasswordService,
   checkAuthService,
   loginUserService,
   logoutUserService,
@@ -71,6 +72,21 @@ export const logout = createAsyncThunk("auth/logout", async (_, thunkAPI) => {
   }
 });
 
+export const changePassword = createAsyncThunk<
+  string, // Kiểu dữ liệu trả về (message từ server)
+  ChangePasswordValues, // Kiểu dữ liệu đầu vào
+  { rejectValue: string } // Kiểu dữ liệu khi bị lỗi
+>("auth/changePassword", async (values, thunkAPI) => {
+  try {
+    const message = await changePasswordService(values);
+    return message; // Trả về thông báo thành công
+  } catch (error: any) {
+    return thunkAPI.rejectWithValue(
+      error.response?.data?.message || "Đổi mật khẩu thất bại"
+    );
+  }
+});
+
 interface AuthState {
   status: "pending" | "loading" | "success" | "error";
   isLoggedIn: boolean;
@@ -128,6 +144,16 @@ const authSlice = createSlice({
       .addCase(logout.fulfilled, (state: AuthState) => {
         state.isLoggedIn = false;
         state.user = null;
+      })
+
+      .addCase(changePassword.pending, (state: AuthState) => {
+        state.status = "loading";
+      })
+      .addCase(changePassword.fulfilled, (state: AuthState, action) => {
+        state.status = "success";
+      })
+      .addCase(changePassword.rejected, (state: AuthState, action) => {
+        state.status = "error";
       });
   },
 });

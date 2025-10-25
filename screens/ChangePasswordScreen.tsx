@@ -12,23 +12,28 @@ import * as Yup from "yup";
 import { useDispatch } from "react-redux";
 import { AppDispatch } from "../store/store";
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-// import { updatePasswordService } from "../services/user.service";
+import { ChangePasswordValues } from "../types/user";
+import { changePassword } from "../store/slices/auth.slice";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import {
+  ProfileDrawerParamList,
+  ProfileStackParamList,
+} from "../types/navigation";
 const ICON_GREY = "#8E8E93";
 
-const ChangePasswordScreen: React.FC = () => {
-  const insets = useSafeAreaInsets();
-  const dispatch = useDispatch<AppDispatch>();
-  const navigation = useNavigation<any>();
+type Props = Partial<
+  NativeStackScreenProps<ProfileDrawerParamList, "ChangePassword">
+>;
 
-  const handleChangePassword = async (values: {
-    currentPassword: string;
-    newPassword: string;
-  }) => {
+const ChangePasswordScreen: React.FC<Props> = ({ navigation }) => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  const handleChangePassword = async (values: ChangePasswordValues) => {
     try {
-      //   await updatePasswordService(values.currentPassword, values.newPassword);
+      await dispatch(changePassword(values)).unwrap();
       Alert.alert("Thông báo", "Cập nhật mật khẩu thành công!");
+      navigation?.navigate("Profile");
     } catch (error: any) {
       Alert.alert("Lỗi", error.message || "Cập nhật mật khẩu thất bại.");
     }
@@ -45,15 +50,7 @@ const ChangePasswordScreen: React.FC = () => {
   });
 
   return (
-    <View style={[styles.container, { marginTop: insets.top }]}>
-      <TouchableOpacity
-        onPress={() => {
-          navigation.dispatch(DrawerActions.openDrawer());
-        }}
-        style={styles.drawerIcon}
-      >
-        <Feather name="menu" size={24} color={ICON_GREY} />
-      </TouchableOpacity>
+    <View style={[styles.container]}>
       <Text style={styles.title}>Đổi mật khẩu</Text>
       <Formik
         initialValues={{
@@ -70,7 +67,7 @@ const ChangePasswordScreen: React.FC = () => {
           handleSubmit,
           values,
           errors,
-          touched,
+          submitCount,
         }) => (
           <>
             <TextInput
@@ -78,7 +75,7 @@ const ChangePasswordScreen: React.FC = () => {
               secureTextEntry
               style={[
                 styles.input,
-                touched.currentPassword && errors.currentPassword
+                errors.currentPassword && submitCount > 0
                   ? styles.inputError
                   : null,
               ]}
@@ -86,7 +83,7 @@ const ChangePasswordScreen: React.FC = () => {
               onBlur={handleBlur("currentPassword")}
               value={values.currentPassword}
             />
-            {touched.currentPassword && errors.currentPassword && (
+            {errors.currentPassword && submitCount > 0 && (
               <Text style={styles.error}>{errors.currentPassword}</Text>
             )}
 
@@ -95,7 +92,7 @@ const ChangePasswordScreen: React.FC = () => {
               secureTextEntry
               style={[
                 styles.input,
-                touched.newPassword && errors.newPassword
+                errors.newPassword && submitCount > 0
                   ? styles.inputError
                   : null,
               ]}
@@ -103,7 +100,7 @@ const ChangePasswordScreen: React.FC = () => {
               onBlur={handleBlur("newPassword")}
               value={values.newPassword}
             />
-            {touched.newPassword && errors.newPassword && (
+            {errors.newPassword && submitCount > 0 && (
               <Text style={styles.error}>{errors.newPassword}</Text>
             )}
 
@@ -112,7 +109,7 @@ const ChangePasswordScreen: React.FC = () => {
               secureTextEntry
               style={[
                 styles.input,
-                touched.confirmPassword && errors.confirmPassword
+                errors.confirmPassword && submitCount > 0
                   ? styles.inputError
                   : null,
               ]}
@@ -120,7 +117,7 @@ const ChangePasswordScreen: React.FC = () => {
               onBlur={handleBlur("confirmPassword")}
               value={values.confirmPassword}
             />
-            {touched.confirmPassword && errors.confirmPassword && (
+            {errors.confirmPassword && submitCount > 0 && (
               <Text style={styles.error}>{errors.confirmPassword}</Text>
             )}
 

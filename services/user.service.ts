@@ -1,4 +1,8 @@
-import { LoginValues, RegisterValues } from "../types/user";
+import {
+  ChangePasswordValues,
+  LoginValues,
+  RegisterValues,
+} from "../types/user";
 import axiosInstance from "./axiosInstance";
 import TokenService from "./token.service";
 
@@ -71,4 +75,13 @@ export const logoutUserService = async () => {
   // Xoá tokens khỏi SecureStore
   await TokenService.deleteTokens();
   return true;
+};
+
+export const changePasswordService = async (values: ChangePasswordValues) => {
+  const response = await axiosInstance.put("/users/password", {
+    currentPassword: values.currentPassword,
+    newPassword: values.newPassword,
+  });
+
+  return response.data.message; // Trả về thông báo từ server
 };
