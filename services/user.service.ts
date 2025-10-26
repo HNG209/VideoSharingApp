@@ -85,3 +85,19 @@ export const changePasswordService = async (values: ChangePasswordValues) => {
 
   return response.data.message; // Trả về thông báo từ server
 };
+
+export const searchService = async (
+  query: string,
+  page: number = 1,
+  limit: number = 10
+) => {
+  const response = await axiosInstance.get("/users/search", {
+    params: {
+      query, // Từ khóa tìm kiếm
+      page, // Trang hiện tại
+      limit, // Số lượng kết quả trên mỗi trang
+    },
+  });
+
+  return response.data.result; // Trả về kết quả tìm kiếm từ server
+};

@@ -1,7 +1,6 @@
 export interface User {
   id: string;
   username: string;
-  name: string | null;
   email: string;
   profile: {
     displayName: string;
