@@ -1,15 +1,25 @@
 import React from "react";
-import { View, Text, StyleSheet, Image, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Pressable,
+  TouchableOpacity,
+} from "react-native";
 
 const PINK = "#ff2d7a";
 
 type UserCardProps = {
   id: string;
   name: string;
-  displayName: string; // Thêm displayName
+  displayName: string;
   avatar: string;
-  status: "following" | "follower" | "mutual" | "request";
+  // status: "following" | "follower" | "mutual" | "request";
+  isFollowed: boolean;
+  isFollower: boolean;
   onFollow: (id: string) => void;
+  onUnfollow: (id: string) => void;
 };
 
 const UserCard: React.FC<UserCardProps> = ({
@@ -17,50 +27,52 @@ const UserCard: React.FC<UserCardProps> = ({
   name,
   displayName,
   avatar,
-  status,
+  isFollower,
+  isFollowed,
   onFollow,
+  onUnfollow,
 }) => {
   const renderAction = () => {
-    if (status === "following" || status === "mutual") {
+    if (isFollowed) {
       return (
-        <Pressable
+        <TouchableOpacity
           style={[styles.btn, styles.btnGhost]}
-          onPress={() => onFollow(id)}
+          onPress={() => onUnfollow(id)}
         >
           <Text style={styles.btnGhostText}>Unfollow</Text>
-        </Pressable>
+        </TouchableOpacity>
       );
     }
     return (
-      <Pressable
+      <TouchableOpacity
         style={[styles.btn, styles.btnPrimary]}
         onPress={() => onFollow(id)}
       >
         <Text style={styles.btnPrimaryText}>Follow</Text>
-      </Pressable>
+      </TouchableOpacity>
     );
   };
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity style={styles.card}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <Image source={{ uri: avatar }} style={styles.avatar} />
         <View style={{ flex: 1 }}>
           <Text style={styles.displayName}>{displayName}</Text>
           <Text style={styles.name}>@{name}</Text>
           <Text style={styles.sub}>
-            {status === "mutual"
-              ? "Mutual"
-              : status === "following"
+            {isFollower && isFollowed // là bạn bè, 2 người cùng follow nhau
+              ? "Friend"
+              : isFollowed
               ? "You follow"
-              : status === "follower"
+              : isFollower
               ? "Follows you"
-              : "Friend request"}
+              : "People"}
           </Text>
         </View>
       </View>
       {renderAction()}
-    </View>
+    </TouchableOpacity>
   );
 };
 

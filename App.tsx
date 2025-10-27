@@ -4,10 +4,10 @@ import AuthStack from "./navigation/AuthStack";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import store, { AppDispatch, RootState } from "./store/store";
 import { MainTab } from "./navigation/MainTab";
-import { use, useEffect } from "react";
+import { useEffect } from "react";
 import { checkAuth } from "./store/slices/auth.slice";
 import { Alert } from "react-native";
-import AppStack from "./navigation/AppStack";
+import LoadingScreen from "./screens/LoadingScreen";
 
 export default function App() {
   return (
@@ -23,9 +23,10 @@ export default function App() {
 
 const RootNavigator = () => {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
+  const authStatus = useSelector((state: RootState) => state.auth.status);
   const dispatch = useDispatch<AppDispatch>();
 
-  // Check authentication status on app start 
+  // Check authentication status on app start
   // Kiểm tra phiên đăng nhập khi app khởi động
   useEffect(() => {
     try {
@@ -42,5 +43,15 @@ const RootNavigator = () => {
     }
   }, [dispatch]);
 
-  return <>{isLoggedIn ? <MainTab /> : <AuthStack />}</>;
+  return (
+    <>
+      {authStatus === "loading" || authStatus === "idle" ? (
+        <LoadingScreen />
+      ) : isLoggedIn ? (
+        <MainTab />
+      ) : (
+        <AuthStack />
+      )}
+    </>
+  );
 };

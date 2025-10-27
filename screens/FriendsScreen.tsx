@@ -17,6 +17,7 @@ import {
 import { RootState, AppDispatch } from "../store/store";
 import UserCard from "../components/UserCard";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { followUser, unfollowUser } from "../store/slices/follow.slice";
 
 const PINK = "#ff2d7a";
 const GREY = "#8E8E93";
@@ -45,7 +46,12 @@ const FriendsScreen: React.FC = () => {
 
   const handleFollow = (id: string) => {
     console.log("Follow/Unfollow user:", id);
-    // Add follow/unfollow logic here
+    dispatch(followUser(id));
+  };
+
+  const handleUnfollow = (id: string) => {
+    console.log("Follow/Unfollow user:", id);
+    dispatch(unfollowUser(id));
   };
 
   return (
@@ -68,15 +74,17 @@ const FriendsScreen: React.FC = () => {
       {/* List */}
       <FlatList
         data={users}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <UserCard
-            id={item.id}
+            id={item._id}
             displayName={item.profile.displayName}
             name={item.username}
             avatar={item.profile.avatar}
-            status="follower" // Replace with actual status
+            isFollower={item.isFollower}
+            isFollowed={item.isFollowed}
             onFollow={handleFollow}
+            onUnfollow={handleUnfollow}
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 10 }} />}

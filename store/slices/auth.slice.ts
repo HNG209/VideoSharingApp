@@ -88,13 +88,13 @@ export const changePassword = createAsyncThunk<
 });
 
 interface AuthState {
-  status: "pending" | "loading" | "success" | "error";
+  status: "idle" | "loading" | "success" | "error";
   isLoggedIn: boolean;
   user: User | null;
 }
 
 const initialState: AuthState = {
-  status: "pending",
+  status: "idle",
   isLoggedIn: false,
   user: null,
 };
@@ -105,6 +105,7 @@ const authSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Check Auth (auto login on app entry)
       .addCase(checkAuth.pending, (state: AuthState) => {
         state.status = "loading";
         state.isLoggedIn = false;
@@ -121,6 +122,7 @@ const authSlice = createSlice({
         state.user = null;
       })
 
+      // Test Auth
       .addCase(testAuth.fulfilled, (state: AuthState, action) => {
         console.log("test auth done");
       })
@@ -129,23 +131,38 @@ const authSlice = createSlice({
         state.user = action.payload;
       })
 
+      // Login
+      .addCase(login.pending, (state: AuthState) => {
+        state.status = "loading";
+      })
       .addCase(
         login.fulfilled,
         (state: AuthState, action: PayloadAction<User>) => {
+          state.status = "success";
           state.isLoggedIn = true;
           state.user = action.payload;
         }
       )
       .addCase(login.rejected, (state: AuthState, action) => {
+        state.status = "error";
         state.isLoggedIn = false;
         state.user = null;
       })
 
+      // Logout
+      .addCase(logout.pending, (state: AuthState) => {
+        state.status = "loading";
+      })
       .addCase(logout.fulfilled, (state: AuthState) => {
+        state.status = "success";
         state.isLoggedIn = false;
         state.user = null;
       })
+      .addCase(logout.rejected, (state: AuthState) => {
+        state.status = "error";
+      })
 
+      // Change password (might remove update status)
       .addCase(changePassword.pending, (state: AuthState) => {
         state.status = "loading";
       })

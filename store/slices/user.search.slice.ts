@@ -1,9 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { searchService } from "../../services/user.service";
-import { User } from "../../types/user";
+import { Friend, User } from "../../types/user";
+import { followUser, unfollowUser } from "./follow.slice";
 
 interface SearchState {
-  users: User[];
+  users: Friend[];
   total: number;
   page: number;
   totalPages: number;
@@ -22,7 +23,7 @@ const initialState: SearchState = {
 
 // Thunk: Fetch trang đầu tiên
 export const fetchSearchResults = createAsyncThunk<
-  { users: User[]; total: number; page: number; totalPages: number },
+  { users: Friend[]; total: number; page: number; totalPages: number },
   { query: string; page?: number; limit?: number },
   { rejectValue: string }
 >(
@@ -46,7 +47,7 @@ export const fetchSearchResults = createAsyncThunk<
 
 // Thunk: Fetch thêm trang tiếp theo
 export const fetchMoreSearchResults = createAsyncThunk<
-  { users: User[]; page: number },
+  { users: Friend[]; page: number },
   { query: string; page: number; limit?: number },
   { rejectValue: string }
 >(
@@ -110,6 +111,25 @@ const searchSlice = createSlice({
       .addCase(fetchMoreSearchResults.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload || "Lỗi không xác định";
+      })
+
+      // lắng nghe bên follow slice
+
+      // Follow
+      .addCase(followUser.fulfilled, (state, action) => {
+        const index = state.users.findIndex((u) => u._id === action.meta.arg);
+
+        if (index == -1) return;
+
+        state.users[index].isFollowed = true;
+      })
+      // Unfollow
+      .addCase(unfollowUser.fulfilled, (state, action) => {
+        const index = state.users.findIndex((u) => u._id === action.meta.arg);
+
+        if (index == -1) return;
+
+        state.users[index].isFollowed = false;
       });
   },
 });

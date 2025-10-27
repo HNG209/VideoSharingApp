@@ -9,6 +9,19 @@ export interface User {
   };
 }
 
+export interface Friend {
+  _id: string;
+  username: string;
+  email: string;
+  isFollowed: boolean;
+  isFollower: boolean;
+  profile: {
+    displayName: string;
+    bio: string;
+    avatar: string;
+  };
+}
+
 export interface ChangePasswordValues {
   currentPassword: string;
   newPassword: string;
