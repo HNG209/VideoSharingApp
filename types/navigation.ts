@@ -24,7 +24,7 @@ export type MainTabParamList = {
   ProfileDetails: { id?: string } | undefined;
   Search: undefined;
   Friends?: undefined;
-  CreateVideo?: undefined;
+  Create: undefined;   
   Detail: { id: string };
 };
 

@@ -13,7 +13,13 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Ứng dụng cần dùng camera để quay video.",
+        "NSMicrophoneUsageDescription": "Ứng dụng cần dùng micro để thu âm.",
+        "NSPhotoLibraryAddUsageDescription": "Ứng dụng cần quyền lưu video vào thư viện.",
+        "NSPhotoLibraryUsageDescription": "Ứng dụng cần truy cập thư viện để chọn/lưu video."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,14 +27,21 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      /* Quyền tối thiểu để quay + lưu video (Android 13+ dùng READ_MEDIA_* thay WRITE_EXTERNAL_STORAGE) */
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_IMAGES"        /* để đọc thumbnail/ảnh nếu cần */
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-secure-store",
-      "expo-font"
+      "expo-camera",
+      "expo-image-picker"
     ]
   }
 }
