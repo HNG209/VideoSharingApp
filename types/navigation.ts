@@ -13,6 +13,11 @@ export type AppStackParamList = {
   Detail: { id: string };
 };
 
+export type CameraStackParamLlist = {
+  Camera: undefined;
+  PostVideo: { uri: string | null };
+};
+
 export type ProfileStackParamList = {
   Profile: undefined;
   EditProfile: undefined;
@@ -24,7 +29,7 @@ export type MainTabParamList = {
   ProfileDetails: { id?: string } | undefined;
   Search: undefined;
   Friends?: undefined;
-  Create: undefined;   
+  Create: undefined;
   Detail: { id: string };
 };
 

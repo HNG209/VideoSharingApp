@@ -6,10 +6,15 @@ import * as MediaLibrary from "expo-media-library";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Video, ResizeMode } from "expo-av";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { CameraStackParamLlist } from "../types/navigation";
+import * as ImagePicker from "expo-image-picker";
 
 const PINK = "#ff2d7a";
 
-export default function RecordVideoScreen({ navigation }: any) {
+type Props = NativeStackScreenProps<CameraStackParamLlist, "Camera">;
+
+const RecordVideoScreen: React.FC<Props> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const camRef = useRef<CameraView>(null);
   const [perm, requestPerm] = useCameraPermissions();
@@ -30,31 +35,41 @@ export default function RecordVideoScreen({ navigation }: any) {
   }
 
   const toggleRecord = async () => {
-  if (isRecording) {
-    // stop quay
-    setIsRecording(false);
-    await camRef.current?.stopRecording();
-  } else {
-    setUri(null);
-    setIsRecording(true);
-    try {
-      // recordAsync trả Promise<RecordingResult>
-      const result = await camRef.current?.recordAsync({
-        maxDuration: 60,
-        quality: "1080p",
-      } as any);
-
-      if (result?.uri) {
-        setUri(result.uri);
-      }
-    } catch (error) {
-      console.error("Record error:", error);
-    } finally {
+    if (isRecording) {
+      // stop quay
       setIsRecording(false);
-    }
-  }
-};
+      await camRef.current?.stopRecording();
+    } else {
+      setUri(null);
+      setIsRecording(true);
+      try {
+        // recordAsync trả Promise<RecordingResult>
+        const result = await camRef.current?.recordAsync({
+          maxDuration: 60,
+          quality: "1080p",
+        } as any);
 
+        if (result?.uri) {
+          setUri(result.uri);
+        }
+      } catch (error) {
+        console.error("Record error:", error);
+      } finally {
+        setIsRecording(false);
+      }
+    }
+  };
+
+  const handlePickVideo = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      allowsEditing: false,
+      quality: 1,
+    });
+    if (!result.canceled && result.assets && result.assets[0]?.uri) {
+      setUri(result.assets[0].uri); // Hiển thị preview trước khi next
+    }
+  };
 
   const handleSave = async () => {
     if (!mlPerm?.granted) await requestMLPerm();
@@ -62,22 +77,20 @@ export default function RecordVideoScreen({ navigation }: any) {
   };
 
   const handleNext = () => {
-    // TODO: nếu bạn có PostVideoScreen thì navigate sang đó, truyền uri
-    // navigation.navigate("PostVideo", { uri });
-    navigation.goBack();
+    navigation.navigate("PostVideo", { uri });
   };
 
   if (uri) {
     return (
       <View style={[styles.container, { paddingTop: insets.top }]}>
         <Video
-            source={{ uri }}
-            style={{ flex: 1 }}
-            resizeMode={ResizeMode.CONTAIN}   
-            shouldPlay
-            isLooping
-            useNativeControls
-            />
+          source={{ uri }}
+          style={{ flex: 1 }}
+          resizeMode={ResizeMode.CONTAIN}
+          shouldPlay
+          isLooping
+          useNativeControls
+        />
         <View style={styles.previewBar}>
           <Pressable style={styles.secondary} onPress={() => setUri(null)}>
             <Feather name="rotate-ccw" size={18} color={PINK} />
@@ -96,7 +109,12 @@ export default function RecordVideoScreen({ navigation }: any) {
 
   return (
     <View style={styles.fill}>
-      <CameraView ref={camRef} style={styles.fill} facing={facing} mode="video" />
+      <CameraView
+        ref={camRef}
+        style={styles.fill}
+        facing={facing}
+        mode="video"
+      />
 
       <View style={[styles.topBar, { paddingTop: insets.top + 6 }]}>
         <Pressable style={styles.round} onPress={() => navigation.goBack()}>
@@ -107,6 +125,9 @@ export default function RecordVideoScreen({ navigation }: any) {
           onPress={() => setFacing((f) => (f === "back" ? "front" : "back"))}
         >
           <Feather name="refresh-ccw" size={20} color="#fff" />
+        </Pressable>
+        <Pressable style={styles.round} onPress={handlePickVideo}>
+          <Feather name="image" size={20} color="#fff" />
         </Pressable>
       </View>
 
@@ -125,7 +146,9 @@ export default function RecordVideoScreen({ navigation }: any) {
       </View>
     </View>
   );
-}
+};
+
+export default RecordVideoScreen;
 
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: "#000" },
@@ -134,45 +157,83 @@ const styles = StyleSheet.create({
   title: { fontWeight: "800", fontSize: 16, marginBottom: 12, color: "#333" },
 
   topBar: {
-    position: "absolute", top: 0, left: 0, right: 0,
-    paddingHorizontal: 12, flexDirection: "row",
-    justifyContent: "space-between", alignItems: "center",
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 
   bottom: {
-    position: "absolute", left: 0, right: 0, bottom: 32,
-    alignItems: "center", justifyContent: "center",
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 32,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   recBtn: {
-    width: 72, height: 72, borderRadius: 36,
-    backgroundColor: "#fff", alignItems: "center", justifyContent: "center",
-    borderWidth: 3, borderColor: PINK,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: PINK,
   },
   recInner: { width: 42, height: 42, borderRadius: 21, backgroundColor: PINK },
 
   previewBar: {
-    position: "absolute", left: 0, right: 0, bottom: 0,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: "rgba(0,0,0,0.35)",
-    padding: 16, flexDirection: "row", justifyContent: "space-between",
+    padding: 16,
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
 
-  primary: { backgroundColor: PINK, paddingHorizontal: 18, paddingVertical: 10, borderRadius: 12 },
+  primary: {
+    backgroundColor: PINK,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
   primaryText: { color: "#fff", fontWeight: "700" },
 
-  ghost: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, borderWidth: 1, borderColor: "#fff" },
+  ghost: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#fff",
+  },
   ghostText: { color: "#fff", fontWeight: "700" },
 
   secondary: {
-    flexDirection: "row", alignItems: "center", gap: 6,
-    paddingHorizontal: 14, paddingVertical: 10, borderRadius: 12, backgroundColor: "#fff",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: "#fff",
   },
   secondaryText: { color: PINK, fontWeight: "700" },
 
   round: {
-    width: 38, height: 38, borderRadius: 19,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: "rgba(0,0,0,0.35)",
-    alignItems: "center", justifyContent: "center",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

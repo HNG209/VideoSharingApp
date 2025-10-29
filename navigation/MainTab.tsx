@@ -11,6 +11,7 @@ import FriendsScreen from "../screens/FriendsScreen";
 import MyProfileScreen from "../screens/MyProfileScreen";
 import { ProfileDrawer } from "./ProfileDrawer";
 import RecordVideoScreen from "../screens/RecordVideoScreen"; // hoặc CreateVideoScreen
+import CameraStack from "./CameraStack";
 
 const Tab = createBottomTabNavigator();
 const PINK = "#ff2d7a";
@@ -36,8 +37,7 @@ export const MainTab = () => {
 
         tabBarIcon: ({ focused, color }) => {
           let icon: keyof typeof Ionicons.glyphMap = "home-outline";
-          if (route.name === "Home")
-            icon = focused ? "home" : "home-outline";
+          if (route.name === "Home") icon = focused ? "home" : "home-outline";
           else if (route.name === "Search")
             icon = focused ? "search" : "search-outline";
           else if (route.name === "Friends")
@@ -55,8 +55,9 @@ export const MainTab = () => {
       {/* Nút + giữa */}
       <Tab.Screen
         name="Create"
-        component={RecordVideoScreen}
+        component={CameraStack}
         options={{
+          tabBarStyle: { display: "none" },
           tabBarLabel: "",
           tabBarIcon: () => null,
           tabBarButton: (props) => <AddButton {...props} />,
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
   },
   addContainer: {
     position: "absolute",
-    bottom: -4, // chỉnh lên xuống nút thêm 
+    bottom: -4, // chỉnh lên xuống nút thêm
     left: "50%",
     transform: [{ translateX: -27 }], // căn giữa tuyệt đối theo chiều ngang
   },
@@ -119,4 +120,3 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
 });
-
