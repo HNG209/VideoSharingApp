@@ -2,6 +2,9 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  likeCount: number;
+  followerCount: number;
+  followingCount: number;
   profile: {
     displayName: string;
     bio: string;
@@ -15,6 +18,9 @@ export interface Friend {
   email: string;
   isFollowed: boolean;
   isFollower: boolean;
+  likeCount: number;
+  followerCount: number;
+  followingCount: number;
   profile: {
     displayName: string;
     bio: string;

@@ -1,63 +1,55 @@
-// src/components/VideoCard.tsx
 import React, { useMemo, useState } from "react";
 import {
   View,
-  Image,
   Text,
   StyleSheet,
   Pressable,
   ActivityIndicator,
-  ImageSourcePropType,
+  TouchableOpacity,
 } from "react-native";
+import { Video } from "expo-av";
+import { Post } from "../types/post";
 
-export interface VideoCardProps {
-  thumbnail: string | ImageSourcePropType; // URL hoặc require()
-  views?: number | string;                 // chấp nhận số hoặc chuỗi
+type VideoCardProps = {
+  post: Post;
   onPress?: () => void;
   onLongPress?: () => void;
   borderRadius?: number;
   width?: number;
   height?: number;
-  aspectRatio?: number;                    // nếu không truyền height -> dùng tỉ lệ
+  aspectRatio?: number;
   testID?: string;
-}
+};
 
-/** Định dạng view-count: 15230 -> 15.2K, 2300000 -> 2.3M */
 function formatViews(v?: number | string): string {
   if (v === undefined || v === null) return "0";
-  const n = typeof v === "string" ? Number(v.toString().replace(/[^\d.-]/g, "")) : v;
+  const n =
+    typeof v === "string" ? Number(v.toString().replace(/[^\d.-]/g, "")) : v;
   if (Number.isNaN(n)) return String(v);
-  if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  if (n >= 1_000_000)
+    return (n / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
   if (n >= 1_000) return (n / 1_000).toFixed(1).replace(/\.0$/, "") + "K";
   return String(n);
 }
 
 const VideoCard: React.FC<VideoCardProps> = React.memo(
   ({
-    thumbnail,
-    views = 0,
+    post,
     onPress,
     onLongPress,
     borderRadius = 10,
     width = 120,
-    height,               // nếu không truyền height, sẽ dùng aspectRatio
-    aspectRatio = 9 / 16, // dọc kiểu TikTok
+    height,
+    aspectRatio = 9 / 16,
     testID,
   }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
-    const source = useMemo(
-      () =>
-        typeof thumbnail === "string" ? { uri: thumbnail } : (thumbnail as ImageSourcePropType),
-      [thumbnail]
-    );
-
     return (
-      <Pressable
+      <TouchableOpacity
         onPress={onPress}
         onLongPress={onLongPress}
-        android_ripple={{ color: "rgba(0,0,0,0.08)" }}
         style={[
           styles.card,
           {
@@ -68,17 +60,19 @@ const VideoCard: React.FC<VideoCardProps> = React.memo(
         ]}
         testID={testID}
         accessibilityRole="imagebutton"
-        accessibilityLabel={`Video, ${formatViews(views)} views`}
+        accessibilityLabel={`Video, ${formatViews(post.viewCount)} views`}
       >
-        <Image
-          source={source}
+        <Video
+          source={{ uri: post.media.url }}
           style={[styles.thumbnail, { borderRadius }]}
           resizeMode="cover"
+          shouldPlay={false}
+          useNativeControls={false}
           onLoadStart={() => {
             setLoading(true);
             setError(false);
           }}
-          onLoadEnd={() => setLoading(false)}
+          onLoad={() => setLoading(false)}
           onError={() => {
             setLoading(false);
             setError(true);
@@ -92,18 +86,23 @@ const VideoCard: React.FC<VideoCardProps> = React.memo(
           </View>
         )}
 
-        {/* Fallback khi lỗi ảnh */}
+        {/* Fallback khi lỗi video */}
         {error && (
           <View style={styles.errorOverlay}>
-            <Text style={styles.errorText}>Image failed</Text>
+            <Text style={styles.errorText}>Video failed</Text>
           </View>
         )}
 
-        {/* Overlay views */}
+        {/* Overlay views & caption */}
         <View style={styles.overlay}>
-          <Text style={styles.viewsText}>▶ {formatViews(views)} views</Text>
+          <Text style={styles.viewsText}>
+            ▶ {formatViews(post.viewCount)} views
+          </Text>
+          <Text style={styles.captionText} numberOfLines={1}>
+            {post.caption}
+          </Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
     );
   }
 );
@@ -130,13 +129,19 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.35)",
   },
   viewsText: { color: "#fff", fontSize: 12, fontWeight: "500" },
+  captionText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "600",
+    marginTop: 2,
+  },
   loadingOverlay: {
-    ...StyleSheet.absoluteFillObject as any,
+    ...(StyleSheet.absoluteFillObject as any),
     alignItems: "center",
     justifyContent: "center",
   },
   errorOverlay: {
-    ...StyleSheet.absoluteFillObject as any,
+    ...(StyleSheet.absoluteFillObject as any),
     backgroundColor: "#ddd",
     alignItems: "center",
     justifyContent: "center",

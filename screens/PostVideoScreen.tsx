@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,15 +8,17 @@ import {
   Pressable,
   Keyboard,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
-import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CameraStackParamLlist } from "../types/navigation";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { uploadPostService } from "../services/post.service";
+import { uploadPost } from "../store/slices/user.post.slice";
 
 const PINK = "#ff2d7a";
 const BG = "#fff";
@@ -26,12 +28,19 @@ type Props = NativeStackScreenProps<CameraStackParamLlist, "PostVideo">;
 const MAX_TAGS = 5;
 
 const PostVideoScreen: React.FC<Props> = ({ route, navigation }) => {
+  const dispatch = useDispatch<AppDispatch>();
+
   const { uri } = route.params;
   const insets = useSafeAreaInsets();
   const user = useSelector((state: RootState) => state.auth.user);
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
+  const [progress, setProgress] = useState<number>(0);
+
+  useEffect(() => {
+    console.log("progress" + progress);
+  }, [progress]);
 
   const handlePost = async () => {
     const formData = new FormData();
@@ -44,8 +53,7 @@ const PostVideoScreen: React.FC<Props> = ({ route, navigation }) => {
     formData.append("caption", caption);
     formData.append("tags", JSON.stringify(tags)); // nếu tags là mảng
 
-    await uploadPostService(formData);
-    console.log("oke");
+    dispatch(uploadPost({ formData, onProgress: setProgress }));
     navigation.goBack();
   };
 
@@ -155,21 +163,21 @@ const PostVideoScreen: React.FC<Props> = ({ route, navigation }) => {
           {tags.map((tag) => (
             <View style={styles.tagItem} key={tag}>
               <Text style={styles.tagText}>#{tag}</Text>
-              <Pressable
+              <TouchableOpacity
                 style={styles.removeTagBtn}
                 onPress={() => handleRemoveTag(tag)}
               >
                 <Feather name="x" size={14} color="#fff" />
-              </Pressable>
+              </TouchableOpacity>
             </View>
           ))}
         </View>
       </View>
 
       {/* Post Button */}
-      <Pressable style={styles.postBtn} onPress={handlePost}>
+      <TouchableOpacity style={styles.postBtn} onPress={handlePost}>
         <Text style={styles.postBtnText}>Đăng video</Text>
-      </Pressable>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
