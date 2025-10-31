@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { checkAuth } from "./store/slices/auth.slice";
 import { Alert } from "react-native";
 import LoadingScreen from "./screens/LoadingScreen";
+import MainStack from "./navigation/MainStack";
 
 export default function App() {
   return (
@@ -48,7 +49,7 @@ const RootNavigator = () => {
       {authStatus === "loading" || authStatus === "idle" ? (
         <LoadingScreen />
       ) : isLoggedIn ? (
-        <MainTab />
+        <MainStack />
       ) : (
         <AuthStack />
       )}

@@ -12,8 +12,10 @@ import MyProfileScreen from "../screens/MyProfileScreen";
 import { ProfileDrawer } from "./ProfileDrawer";
 import RecordVideoScreen from "../screens/RecordVideoScreen"; // hoặc CreateVideoScreen
 import CameraStack from "./CameraStack";
+import { MainTabParamList } from "../types/navigation";
+import { VideoPostScreen } from "../screens/VideoPostScreen";
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<MainTabParamList>();
 const PINK = "#ff2d7a";
 const GREY = "gray";
 
@@ -63,7 +65,6 @@ export const MainTab = () => {
           tabBarButton: (props) => <AddButton {...props} />,
         }}
       />
-
       <Tab.Screen name="Friends" component={FriendsScreen} />
       <Tab.Screen name="MyProfile" component={ProfileDrawer} />
     </Tab.Navigator>

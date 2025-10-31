@@ -23,6 +23,8 @@ import { AppDispatch, RootState } from "../store/store";
 import { fetchUserPost } from "../store/slices/user.post.slice";
 import { Post } from "../types/post";
 import VideoCard from "../components/VideoCard";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { ProfileStackParamList } from "../types/navigation";
 
 const SCREEN_W = Dimensions.get("window").width;
 const GUTTER = 10;
@@ -35,7 +37,10 @@ const ICON_GREY = "#8E8E93";
 const TAB_KEYS = ["My Videos", "My Images", "Liked"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
-const MyProfileScreen = ({ navigation }: any) => {
+type Props = Partial<NativeStackScreenProps<ProfileStackParamList, "Profile">>;
+
+const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
+  const nav2 = navigation?.getParent()?.getParent()?.getParent();
   const dispatch = useDispatch<AppDispatch>();
   const profile = useSelector((state: RootState) => state.auth.user);
   const posts = useSelector((state: RootState) => state.userPost.posts);
@@ -106,7 +111,15 @@ const MyProfileScreen = ({ navigation }: any) => {
   ] as const;
 
   const renderGridItem = ({ item }: { item: Post }) => (
-    <VideoCard post={item} width={CARD_W} height={CARD_W * 1.45} />
+    <VideoCard
+      post={item}
+      onPress={() => {
+        console.log("press");
+        nav2?.navigate("VideoPost", { post: item });
+      }}
+      width={CARD_W}
+      height={CARD_W * 1.45}
+    />
   );
 
   return (

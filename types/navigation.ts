@@ -1,3 +1,5 @@
+import { Post } from "./post";
+
 export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
@@ -31,6 +33,11 @@ export type MainTabParamList = {
   Friends?: undefined;
   Create: undefined;
   Detail: { id: string };
+};
+
+export type MainStackParamList = {
+  VideoPost: { post: Post };
+  MainTab: undefined;
 };
 
 export type ProfileDrawerParamList = {

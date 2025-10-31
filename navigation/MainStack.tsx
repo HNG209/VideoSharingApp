@@ -1,14 +1,15 @@
 // src/navigation/AuthStack.tsx
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { ProfileStackParamList } from "../types/navigation";
-import MyProfileScreen from "../screens/MyProfileScreen";
-import EditProfileScreen from "../screens/EditProfileScreen";
+import LoginScreen from "../screens/LoginScreen";
+import RegisterScreen from "../screens/RegisterScreen";
+import { AuthStackParamList, MainStackParamList } from "../types/navigation";
+import { MainTab } from "./MainTab";
 import { VideoPostScreen } from "../screens/VideoPostScreen";
 
-const Stack = createNativeStackNavigator<ProfileStackParamList>();
+const Stack = createNativeStackNavigator<MainStackParamList>();
 
-export default function ProfileStack() {
+export default function MainStack() {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -16,15 +17,15 @@ export default function ProfileStack() {
       }}
     >
       <Stack.Screen
-        name="Profile"
-        component={MyProfileScreen}
+        name="MainTab"
+        component={MainTab}
         options={{
           animation: "slide_from_left",
         }}
       />
       <Stack.Screen
-        name="EditProfile"
-        component={EditProfileScreen}
+        name="VideoPost"
+        component={VideoPostScreen}
         options={{
           animation: "slide_from_right",
         }}
