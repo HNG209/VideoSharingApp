@@ -12,6 +12,15 @@ export interface User {
   };
 }
 
+export interface PostAuthor {
+  _id: string;
+  profile: {
+    displayName: string;
+    bio: string;
+    avatar: string;
+  };
+}
+
 export interface Friend {
   _id: string;
   username: string;

@@ -9,10 +9,58 @@ import {
   Animated,
   Modal,
   Image,
+  FlatList,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { Post } from "../types/post";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
+import { toggleLike } from "../store/slices/like.slice";
+import CommentCard from "../components/CommentCard";
+
+// Dummy comment data for demo
+const dummyComments = [
+  {
+    _id: "1",
+    user: {
+      username: "john_doe",
+      profile: {
+        displayName: "John Doe",
+        avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+      },
+    },
+    content: "Video hay quá!",
+    createdAt: "2024-06-01T12:00:00Z",
+  },
+  {
+    _id: "2",
+    user: {
+      username: "jane_smith",
+      profile: {
+        displayName: "Jane Smith",
+        avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+      },
+    },
+    content: "Tuyệt vời 👏",
+    createdAt: "2024-06-01T12:05:00Z",
+  },
+  {
+    _id: "3",
+    user: {
+      username: "jane_smith",
+      profile: {
+        displayName: "Jane Smith",
+        avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+      },
+    },
+    content: "Tuyệt vời 👏",
+    createdAt: "2024-06-01T12:05:00Z",
+  },
+];
 
 const { height, width } = Dimensions.get("window");
 const PINK = "#ff2d7a";
@@ -27,10 +75,14 @@ export const VideoPostScreen: React.FC<Props> = ({ post, isVisible }) => {
   const videoRef = useRef<Video>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [liked, setLiked] = useState(false);
+  const [liked, setLiked] = useState(post.isLikedByCurrentUser);
   const [showStopBtn, setShowStopBtn] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [showCommentModal, setShowCommentModal] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const dispatch = useDispatch<AppDispatch>();
+
+  const user = useSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -63,6 +115,7 @@ export const VideoPostScreen: React.FC<Props> = ({ post, isVisible }) => {
 
   const handleLike = useCallback(() => {
     setLiked((prev) => !prev);
+    dispatch(toggleLike({ targetId: post._id, onModel: "post" }));
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 1.3,
@@ -100,6 +153,20 @@ export const VideoPostScreen: React.FC<Props> = ({ post, isVisible }) => {
     // TODO: Chuyển sang màn hình chỉnh sửa post
   };
 
+  const handleViewProfile = () => {
+    // TODO: Xử lý xem hồ sơ người dùng
+    // nếu là người dùng hiện tại thì chuyển đến trang cá nhân
+    // nếu là người dùng khác thì chuyển đến trang xem người dùng đó
+    if (user?.id === post.author._id) {
+      // navigation.navigate("Profile");
+    } else {
+      // navigation.navigate("UserProfile", { userId: post.author._id });
+    }
+  };
+
+  // Comment input state
+  const [commentInput, setCommentInput] = useState("");
+
   return (
     <TouchableWithoutFeedback onPress={handlePressVideo}>
       <View style={styles.container}>
@@ -123,20 +190,6 @@ export const VideoPostScreen: React.FC<Props> = ({ post, isVisible }) => {
             </TouchableOpacity>
           </View>
         )}
-
-        {/* Nút tắt/bật âm thanh ở góc trên */}
-        {/* <View style={styles.topRight}>
-          <TouchableOpacity
-            onPress={handleToggleMute}
-            style={styles.controlBtn}
-          >
-            <Ionicons
-              name={isMuted ? "volume-mute" : "volume-high"}
-              size={26}
-              color="#fff"
-            />
-          </TouchableOpacity>
-        </View> */}
 
         {/* Modal tuỳ chọn */}
         <Modal
@@ -175,6 +228,58 @@ export const VideoPostScreen: React.FC<Props> = ({ post, isVisible }) => {
           </TouchableOpacity>
         </Modal>
 
+        {/* Modal comment */}
+        <Modal
+          visible={showCommentModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowCommentModal(false)}
+        >
+          <KeyboardAvoidingView
+            style={styles.commentModalContainer}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+          >
+            <TouchableOpacity
+              style={styles.commentModalOverlay}
+              activeOpacity={1}
+              onPress={() => setShowCommentModal(false)}
+            />
+            <View style={styles.commentModalContent}>
+              <View style={styles.commentHeader}>
+                <Text style={styles.commentCount}>
+                  {post.commentCount} bình luận
+                </Text>
+                <TouchableOpacity onPress={() => setShowCommentModal(false)}>
+                  <Ionicons name="close" size={24} color="#222" />
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={dummyComments}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => <CommentCard comment={item} />}
+                contentContainerStyle={{ paddingBottom: 12 }}
+                showsVerticalScrollIndicator={false}
+              />
+              <View style={styles.commentInputRow}>
+                <TextInput
+                  style={styles.commentInput}
+                  placeholder="Viết bình luận..."
+                  value={commentInput}
+                  onChangeText={setCommentInput}
+                  placeholderTextColor="#888"
+                />
+                <TouchableOpacity
+                  style={styles.commentSendBtn}
+                  onPress={() => setCommentInput("")}
+                  disabled={!commentInput.trim()}
+                >
+                  <Ionicons name="send" size={22} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
+
         {/* Caption */}
         <View style={styles.bottomInfo}>
           <Text style={styles.author}>{post?.author?.profile.displayName}</Text>
@@ -186,10 +291,12 @@ export const VideoPostScreen: React.FC<Props> = ({ post, isVisible }) => {
         {/* Icon bên phải */}
         <View style={styles.rightColumn}>
           {/* avatar */}
-          <Image
-            source={{ uri: post?.author?.profile.avatar }}
-            style={styles.avatar}
-          />
+          <TouchableOpacity>
+            <Image
+              source={{ uri: post?.author?.profile.avatar }}
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
 
           <TouchableOpacity onPress={handleLike} activeOpacity={0.7}>
             <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
@@ -204,7 +311,11 @@ export const VideoPostScreen: React.FC<Props> = ({ post, isVisible }) => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity activeOpacity={0.7} style={styles.iconGroup}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            style={styles.iconGroup}
+            onPress={() => setShowCommentModal(true)}
+          >
             <Ionicons name="chatbubble-outline" size={32} color={GREY} />
             <Text style={styles.iconLabel}>{post?.commentCount}</Text>
           </TouchableOpacity>
@@ -262,27 +373,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  topRight: {
-    position: "absolute",
-    top: 40,
-    right: 16 + 40, // dịch sang trái để không đè lên nút options
-    flexDirection: "column",
-    gap: 12,
-    zIndex: 10,
-  },
-  topOptions: {
-    position: "absolute",
-    top: 40,
-    right: 16,
-    zIndex: 20,
-  },
-  optionsBtn: {
-    backgroundColor: "rgba(0,0,0,0.4)",
-    borderRadius: 20,
-    padding: 8,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.25)",
@@ -337,5 +427,61 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
     textAlign: "center",
+  },
+  commentModalContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  commentModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
+  commentModalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: height * 0.7,
+    paddingBottom: 0,
+    paddingHorizontal: 0,
+  },
+  commentHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 18,
+    paddingTop: 16,
+    paddingBottom: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: "#eee",
+  },
+  commentCount: {
+    fontWeight: "700",
+    fontSize: 16,
+    color: "#222",
+  },
+  commentInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderColor: "#eee",
+    backgroundColor: "#fafbfc",
+  },
+  commentInput: {
+    flex: 1,
+    backgroundColor: "#f4f5f7",
+    borderRadius: 10,
+    padding: 10,
+    fontSize: 15,
+    color: "#222",
+    marginRight: 8,
+  },
+  commentSendBtn: {
+    backgroundColor: PINK,
+    borderRadius: 10,
+    padding: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 1,
   },
 });

@@ -4,6 +4,8 @@ import {
   fetchUserPostService,
   uploadPostService,
 } from "../../services/post.service";
+import { toggleLike } from "./like.slice";
+import { LikeResponse } from "../../types/like";
 
 interface UserPost {
   posts: Post[];
@@ -19,17 +21,14 @@ export const uploadPost = createAsyncThunk<
   Post, // Kiểu dữ liệu trả về
   { formData: FormData; onProgress?: (p: number) => void }, // Kiểu tham số đầu vào
   { rejectValue: string } // Kiểu giá trị khi reject
->(
-  "userPost/uploadPost",
-  async ({ formData, onProgress }, thunkAPI) => {
-    try {
-      const result = await uploadPostService(formData, onProgress);
-      return result;
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(`Upload post thất bại\n${error.message}`);
-    }
+>("userPost/uploadPost", async ({ formData, onProgress }, thunkAPI) => {
+  try {
+    const result = await uploadPostService(formData, onProgress);
+    return result;
+  } catch (error: any) {
+    return thunkAPI.rejectWithValue(`Upload post thất bại\n${error.message}`);
   }
-);
+});
 
 export const fetchUserPost = createAsyncThunk<Post[], void>(
   "userPost/fetchUserPost",
@@ -48,8 +47,25 @@ const userPostSlice = createSlice({
   name: "userPost",
   initialState,
   reducers: {},
-  extraReducers: (builber) => {
-    builber
+  extraReducers: (builder) => {
+    builder
+      // Like update trạng thái
+      .addCase(toggleLike.fulfilled, (state: UserPost, action) => {
+        const { liked } = action.payload;
+        if (action.meta.arg.onModel !== "post") return;
+        const index = state.posts.findIndex(
+          (p) => p._id === action.meta.arg.targetId
+        );
+        if (index !== -1) {
+          const post = state.posts[index];
+          // const likeCount = post.likeCount || 0;
+          state.posts[index] = {
+            ...post,
+            // likeCount: liked ? likeCount + 1 : Math.max(likeCount - 1, 0),
+            isLikedByCurrentUser: liked,
+          };
+        }
+      })
       // Upload post
       .addCase(uploadPost.pending, (state: UserPost) => {
         state.status = "loading";

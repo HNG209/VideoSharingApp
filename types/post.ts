@@ -1,8 +1,8 @@
-import { User } from "./user";
+import { PostAuthor, User } from "./user";
 
 export interface Post {
   _id: string;
-  author: User;
+  author: PostAuthor;
   caption: string;
   tags: string[];
   media: {
@@ -13,4 +13,8 @@ export interface Post {
   likeCount: number;
   commentCount: number;
   saveCount: number;
+  isLikedByCurrentUser: boolean;
+  isSavedByCurrentUser: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
