@@ -114,8 +114,7 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
     <VideoCard
       post={item}
       onPress={() => {
-        console.log("press");
-        nav2?.navigate("VideoPost", { post: item });
+        nav2?.navigate("VideoFeed", { initialPost: item });
       }}
       width={CARD_W}
       height={CARD_W * 1.45}

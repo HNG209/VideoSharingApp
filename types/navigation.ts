@@ -36,7 +36,7 @@ export type MainTabParamList = {
 };
 
 export type MainStackParamList = {
-  VideoPost: { post: Post };
+  VideoFeed: { initialPost: Post };
   MainTab: undefined;
 };
 

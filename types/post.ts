@@ -1,6 +1,8 @@
+import { User } from "./user";
+
 export interface Post {
   _id: string;
-  author: string;
+  author: User;
   caption: string;
   tags: string[];
   media: {

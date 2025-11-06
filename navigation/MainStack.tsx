@@ -6,6 +6,7 @@ import RegisterScreen from "../screens/RegisterScreen";
 import { AuthStackParamList, MainStackParamList } from "../types/navigation";
 import { MainTab } from "./MainTab";
 import { VideoPostScreen } from "../screens/VideoPostScreen";
+import { VideoFeedScreen } from "../screens/VideoFeedScreen";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -24,8 +25,8 @@ export default function MainStack() {
         }}
       />
       <Stack.Screen
-        name="VideoPost"
-        component={VideoPostScreen}
+        name="VideoFeed"
+        component={VideoFeedScreen}
         options={{
           animation: "slide_from_right",
         }}
