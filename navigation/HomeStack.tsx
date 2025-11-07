@@ -17,19 +17,19 @@ export default function HomeStack() {
       }}
     >
       <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={{
-          animation: "slide_from_left",
-        }}
-      />
-      <Stack.Screen
         name="HomeFeed"
         component={HomeFeedScreen}
         options={{
           animation: "slide_from_right",
         }}
       />
+      {/* <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          animation: "slide_from_left",
+        }}
+      /> */}
     </Stack.Navigator>
   );
 }

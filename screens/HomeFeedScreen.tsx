@@ -1,4 +1,4 @@
-import React, { useRef, useMemo, useState } from "react";
+import React, { useRef, useMemo, useState, useEffect } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -6,12 +6,13 @@ import {
   View,
   Dimensions,
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import { VideoPostScreen } from "./VideoPostScreen";
-import { RootState } from "../store/store";
+import { AppDispatch, RootState } from "../store/store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { HomeStackParamList, MainStackParamList } from "../types/navigation";
+import { fetchUserFeed } from "../store/slices/feed.slice";
 
 const { height } = Dimensions.get("window");
 
@@ -19,14 +20,9 @@ type Props = Partial<NativeStackScreenProps<HomeStackParamList, "HomeFeed">>;
 
 export const HomeFeedScreen = ({ route, navigation }: Props) => {
   const flatListRef = useRef<FlatList>(null);
-  const feedType = route?.params?.feedType;
-  const initialPost = route?.params?.initialPost;
+  const dispatch = useDispatch<AppDispatch>();
   const [visibleIndex, setVisibleIndex] = useState<number>(0);
-  const posts = useSelector((state: RootState) => {
-    if (feedType === "other") return state.otherUserPost.posts;
-    // if (feedType === "global") return state.globalPost.posts;
-    return state.userPost.posts;
-  });
+  const posts = useSelector((state: RootState) => state.feed.posts);
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: any[] }) => {
@@ -36,10 +32,14 @@ export const HomeFeedScreen = ({ route, navigation }: Props) => {
     }
   ).current;
 
-  const initialIndex = useMemo(() => {
-    const idx = posts.findIndex((p) => p._id === initialPost?._id);
-    return idx >= 0 ? idx : 0;
-  }, [posts, initialPost]);
+  useEffect(() => {
+    dispatch(fetchUserFeed());
+  }, []);
+
+  //   const initialIndex = useMemo(() => {
+  //     const idx = posts.findIndex((p) => p._id === initialPost?._id);
+  //     return idx >= 0 ? idx : 0;
+  //   }, [posts, initialPost]);
 
   if (!posts || posts.length === 0) {
     return <View style={[styles.container, { backgroundColor: "black" }]} />;
@@ -49,7 +49,7 @@ export const HomeFeedScreen = ({ route, navigation }: Props) => {
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation?.goBack()}
+        onPress={() => navigation?.navigate("Home")}
         activeOpacity={0.7}
       >
         <Ionicons name="arrow-back" size={28} color="white" />
@@ -76,7 +76,7 @@ export const HomeFeedScreen = ({ route, navigation }: Props) => {
         renderItem={({ item, index }) => (
           <VideoPostScreen post={item} isVisible={index === visibleIndex} />
         )}
-        initialScrollIndex={initialIndex}
+        // initialScrollIndex={initialIndex}
         onScrollToIndexFailed={({ index }) => {
           console.warn("Scroll failed, fallback to safe index:", index);
           setTimeout(() => {

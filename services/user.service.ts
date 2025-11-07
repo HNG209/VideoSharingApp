@@ -106,3 +106,8 @@ export const fetchUserProfileService = async (userId: string) => {
   const response = await axiosInstance.get(`/users/${userId}`);
   return response.data.result; // Trả về thông tin user từ server
 };
+
+export const fetchUserFeedService = async () => {
+  const response = await axiosInstance.get("/users/feed");
+  return response.data.result; // Trả về danh sách bài viết từ server
+};

@@ -6,11 +6,13 @@ import userPostReducer from "./slices/user.post.slice";
 import commentReducer from "./slices/comment.slice";
 import otherUserPostReducer from "./slices/other.post.slice";
 import otherProfileReducer from "./slices/other.profile.slice";
+import feedReducer from "./slices/feed.slice";
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
     search: userSearchReducer,
+    feed: feedReducer,
     otherProfile: otherProfileReducer,
     comment: commentReducer,
     follow: followReducer,

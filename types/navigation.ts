@@ -43,7 +43,7 @@ export type MainStackParamList = {
 
 export type HomeStackParamList = {
   Home: undefined;
-  HomeFeed: { initialPost: Post; feedType: "profile" | "other" | "home" };
+  HomeFeed: undefined;
 };
 
 export type ProfileDrawerParamList = {
