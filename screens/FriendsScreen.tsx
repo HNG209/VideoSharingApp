@@ -1,5 +1,11 @@
 // src/screens/FriendsScreen.tsx
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   Text,
@@ -24,6 +30,8 @@ import { RootState, AppDispatch } from "../store/store";
 import UserCard from "../components/UserCard";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { followUser, unfollowUser } from "../store/slices/follow.slice";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { MainTabParamList } from "../types/navigation";
 
 const PINK = "#ff2d7a";
 const GREY = "#8E8E93";
@@ -37,7 +45,10 @@ const MAX_HISTORY = 8;
 const FILTERS = ["All", "Following", "Followers", "Suggested"] as const;
 type FilterKey = (typeof FILTERS)[number];
 
-const FriendsScreen: React.FC = () => {
+type Props = Partial<NativeStackScreenProps<MainTabParamList, "Friends">>;
+
+const FriendsScreen: React.FC<Props> = ({ navigation }) => {
+  const nav2 = navigation?.getParent();
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch<AppDispatch>();
   const { users } = useSelector((state: RootState) => state.search);
@@ -84,10 +95,10 @@ const FriendsScreen: React.FC = () => {
       const key = text.trim();
       if (!key) return;
       // dedupe + đưa lên đầu + cắt max
-      const next = [key, ...history.filter((h) => h.toLowerCase() !== key.toLowerCase())].slice(
-        0,
-        MAX_HISTORY
-      );
+      const next = [
+        key,
+        ...history.filter((h) => h.toLowerCase() !== key.toLowerCase()),
+      ].slice(0, MAX_HISTORY);
       await saveHistory(next);
     },
     [history, saveHistory]
@@ -127,7 +138,9 @@ const FriendsScreen: React.FC = () => {
 
         const prevLen = lastLengthRef.current;
         // @ts-ignore unwrap nếu thunk hỗ trợ
-        await dispatch(fetchSearchResults({ query: text, page: pageNo })).unwrap?.();
+        await dispatch(
+          fetchSearchResults({ query: text, page: pageNo })
+        ).unwrap?.();
 
         // nhớ lịch sử khi thực sự submit tìm kiếm
         if (shouldRemember) await addToHistory(text);
@@ -188,6 +201,11 @@ const FriendsScreen: React.FC = () => {
     setPage(1);
     setShowHistory(false);
     doSearch("", 1, "search", false);
+  };
+
+  const handleViewProfile = (userId: string) => {
+    console.log("View profile of", userId);
+    nav2?.navigate("OtherProfile", { userId });
   };
 
   // ====== Load more / Refresh ======
@@ -298,7 +316,12 @@ const FriendsScreen: React.FC = () => {
               renderItem={({ item }) => (
                 <View style={styles.historyRow}>
                   <Pressable
-                    style={{ flexDirection: "row", alignItems: "center", flex: 1, gap: 8 }}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      flex: 1,
+                      gap: 8,
+                    }}
                     onPress={() => {
                       setQuery(item);
                       handleSubmit(item);
@@ -309,7 +332,10 @@ const FriendsScreen: React.FC = () => {
                       {item}
                     </Text>
                   </Pressable>
-                  <Pressable onPress={() => removeFromHistory(item)} hitSlop={8}>
+                  <Pressable
+                    onPress={() => removeFromHistory(item)}
+                    hitSlop={8}
+                  >
                     <Feather name="x" size={18} color={GREY} />
                   </Pressable>
                 </View>
@@ -332,7 +358,9 @@ const FriendsScreen: React.FC = () => {
                 onPress={() => setFilter(key)}
                 style={[styles.chip, active && styles.chipActive]}
               >
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                <Text
+                  style={[styles.chipText, active && styles.chipTextActive]}
+                >
                   {key}
                 </Text>
               </Pressable>
@@ -355,6 +383,7 @@ const FriendsScreen: React.FC = () => {
         keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <UserCard
+            onPress={() => handleViewProfile(item._id)}
             id={item._id}
             displayName={item.profile.displayName}
             name={item.username}
@@ -389,7 +418,9 @@ const FriendsScreen: React.FC = () => {
             <View style={styles.emptyWrap}>
               <Feather name="user-x" size={44} color={GREY} />
               <Text style={styles.emptyTitle}>No friends found</Text>
-              <Text style={styles.emptySub}>Thử từ khóa khác hoặc chuyển bộ lọc.</Text>
+              <Text style={styles.emptySub}>
+                Thử từ khóa khác hoặc chuyển bộ lọc.
+              </Text>
               {!!query && (
                 <Pressable style={styles.clearBtn} onPress={handleClear}>
                   <Text style={styles.clearBtnText}>Clear search</Text>
@@ -417,7 +448,9 @@ const styles = StyleSheet.create({
 
   headerWrap: {
     position: "absolute",
-    top: 0, left: 0, right: 0,
+    top: 0,
+    left: 0,
+    right: 0,
     backgroundColor: BG,
     zIndex: 50,
     shadowColor: "#000",
@@ -482,7 +515,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   historyText: { color: "#333", flex: 1 },
-  sep: { height: StyleSheet.hairlineWidth, backgroundColor: "#eee", marginHorizontal: 12 },
+  sep: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#eee",
+    marginHorizontal: 12,
+  },
 
   // Filters
   filterRow: {
@@ -492,7 +529,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 2,
   },
-  chip: { paddingHorizontal: 12, paddingVertical: 7, borderRadius: 16, backgroundColor: "#f6f7fb" },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 16,
+    backgroundColor: "#f6f7fb",
+  },
   chipActive: { backgroundColor: "#ffe6ef" },
   chipText: { color: "#5d6a7a", fontWeight: "600" },
   chipTextActive: { color: PINK },

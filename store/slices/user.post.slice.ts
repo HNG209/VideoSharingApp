@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { Post } from "../../types/post";
 import {
+  fetchPostsByUserService,
   fetchUserPostService,
   uploadPostService,
 } from "../../services/post.service";

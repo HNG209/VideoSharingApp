@@ -36,8 +36,14 @@ export type MainTabParamList = {
 };
 
 export type MainStackParamList = {
-  VideoFeed: { initialPost: Post };
+  VideoFeed: { initialPost: Post; feedType: "profile" | "other" | "home" };
   MainTab: undefined;
+  OtherProfile: { userId: string };
+};
+
+export type HomeStackParamList = {
+  Home: undefined;
+  HomeFeed: { initialPost: Post; feedType: "profile" | "other" | "home" };
 };
 
 export type ProfileDrawerParamList = {

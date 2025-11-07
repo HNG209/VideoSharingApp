@@ -11,13 +11,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { VideoPostScreen } from "./VideoPostScreen";
 import { RootState } from "../store/store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { MainStackParamList } from "../types/navigation";
+import { HomeStackParamList, MainStackParamList } from "../types/navigation";
 
 const { height } = Dimensions.get("window");
 
-type Props = Partial<NativeStackScreenProps<MainStackParamList, "VideoFeed">>;
+type Props = Partial<NativeStackScreenProps<HomeStackParamList, "HomeFeed">>;
 
-export const VideoFeedScreen = ({ route, navigation }: Props) => {
+export const HomeFeedScreen = ({ route, navigation }: Props) => {
   const flatListRef = useRef<FlatList>(null);
   const feedType = route?.params?.feedType;
   const initialPost = route?.params?.initialPost;
@@ -36,13 +36,11 @@ export const VideoFeedScreen = ({ route, navigation }: Props) => {
     }
   ).current;
 
-  // ✅ Dùng useMemo để tránh tính lại mỗi lần render
   const initialIndex = useMemo(() => {
     const idx = posts.findIndex((p) => p._id === initialPost?._id);
     return idx >= 0 ? idx : 0;
   }, [posts, initialPost]);
 
-  // ✅ Tránh FlatList render khi chưa có data
   if (!posts || posts.length === 0) {
     return <View style={[styles.container, { backgroundColor: "black" }]} />;
   }

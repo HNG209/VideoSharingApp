@@ -101,3 +101,8 @@ export const searchService = async (
 
   return response.data.result; // Trả về kết quả tìm kiếm từ server
 };
+
+export const fetchUserProfileService = async (userId: string) => {
+  const response = await axiosInstance.get(`/users/${userId}`);
+  return response.data.result; // Trả về thông tin user từ server
+};

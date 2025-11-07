@@ -21,11 +21,14 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
-import { fetchUserPost } from "../store/slices/user.post.slice";
+import { fetchOtherUserPost } from "../store/slices/other.post.slice";
+import { fetchOtherUserProfile } from "../store/slices/other.profile.slice";
 import { Post } from "../types/post";
 import VideoCard from "../components/VideoCard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ProfileStackParamList } from "../types/navigation";
+import { MainStackParamList } from "../types/navigation";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { followUser, unfollowUser } from "../store/slices/follow.slice";
 
 const SCREEN_W = Dimensions.get("window").width;
 const GUTTER = 10;
@@ -35,18 +38,25 @@ const INDICATOR_W = 74;
 const PINK = "#ff2d7a";
 const ICON_GREY = "#8E8E93";
 
-const TAB_KEYS = ["My Videos", "My Images", "Liked"] as const;
+const TAB_KEYS = ["Videos", "Images", "Liked"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
-type Props = Partial<NativeStackScreenProps<ProfileStackParamList, "Profile">>;
+type Props = Partial<
+  NativeStackScreenProps<MainStackParamList, "OtherProfile">
+>;
 
-const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
-  const nav2 = navigation?.getParent()?.getParent()?.getParent();
+const OtherProfileScreen: React.FC<Props> = ({ navigation, route }) => {
+  const insets = useSafeAreaInsets();
   const dispatch = useDispatch<AppDispatch>();
-  const profile = useSelector((state: RootState) => state.auth.user);
-  const posts = useSelector((state: RootState) => state.userPost.posts);
+  const userId = route?.params?.userId;
+  const otherProfile = useSelector(
+    (state: RootState) => state.otherProfile.user
+  );
+  const posts = useSelector((state: RootState) => state.otherUserPost.posts);
   const [refreshing, setRefreshing] = useState(false);
-  const [tab, setTab] = useState<TabKey>("My Videos");
+  const [tab, setTab] = useState<TabKey>("Videos");
+  const [isFollowing, setIsFollowing] = useState(false);
+  const followAnim = useRef(new Animated.Value(1)).current;
 
   // Scroll animation
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -56,13 +66,20 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   useEffect(() => {
-    dispatch(fetchUserPost());
-  }, []);
+    if (otherProfile) {
+      setIsFollowing(otherProfile.isFollowed);
+    }
+  }, [otherProfile]);
+
+  useEffect(() => {
+    dispatch(fetchOtherUserPost(userId!));
+    dispatch(fetchOtherUserProfile(userId!));
+  }, [userId]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    dispatch(fetchUserPost()).finally(() => setRefreshing(false));
-  }, [dispatch]);
+    dispatch(fetchOtherUserPost(userId!)).finally(() => setRefreshing(false));
+  }, [dispatch, userId]);
 
   const onTabLayout =
     (index: number) =>
@@ -100,14 +117,14 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
     pagerRef.current?.scrollToIndex({ index, animated: true });
   };
 
-  // === Mock data (you can replace later with API data per tab) ===
+  // === Mock data (bạn có thể thay bằng API data từng tab) ===
   const videos = useMemo(() => posts, [posts]);
   const images = useMemo(() => posts, [posts]);
   const liked = useMemo(() => posts, [posts]);
 
   const PAGES = [
-    { key: "My Videos", data: videos },
-    { key: "My Images", data: images },
+    { key: "Videos", data: videos },
+    { key: "Images", data: images },
     { key: "Liked", data: liked },
   ] as const;
 
@@ -115,59 +132,127 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
     <VideoCard
       post={item}
       onPress={() => {
-        nav2?.navigate("VideoFeed", { initialPost: item, feedType: "profile" });
+        navigation?.navigate("VideoFeed", {
+          initialPost: item,
+          feedType: "other",
+        });
       }}
       width={CARD_W}
       height={CARD_W * 1.45}
     />
   );
 
+  // Hiệu ứng transition cho nút follow
+  const handleFollow = useCallback(() => {
+    Animated.sequence([
+      Animated.timing(followAnim, {
+        toValue: 0.8,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+      Animated.timing(followAnim, {
+        toValue: 1,
+        duration: 120,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setIsFollowing((prev) => !prev);
+      if (isFollowing) {
+        dispatch(unfollowUser(userId!));
+      } else {
+        dispatch(followUser(userId!));
+      }
+      // TODO: callback xử lý follow/unfollow ở đây
+    });
+  }, []);
+
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { paddingTop: insets.top }]}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
-      contentContainerStyle={{ paddingBottom: 100 }}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
     >
+      {/* Nút trở về */}
+      <Pressable style={[styles.backBtn]} onPress={() => navigation?.goBack()}>
+        <Feather name="arrow-left" size={24} color="#222" />
+      </Pressable>
+
       {/* Profile info */}
       <View style={styles.headerCenter}>
         <Image
-          source={{ uri: profile?.profile?.avatar }}
+          source={{ uri: otherProfile?.profile?.avatar }}
           style={styles.avatar}
         />
         <Text style={styles.name}>
-          {profile?.profile?.displayName || profile?.username}
+          {otherProfile?.profile?.displayName || otherProfile?.username}
         </Text>
-        <Text style={styles.username}>@{profile?.username}</Text>
+        <Text style={styles.username}>@{otherProfile?.username}</Text>
 
-        <Pressable
-          style={styles.editButton}
-          onPress={() => navigation?.navigate("EditProfile")}
-        >
-          <Feather name="edit-2" size={14} color={PINK} />
-          <Text style={styles.editButtonText}> Edit Profile</Text>
-        </Pressable>
+        {/* Nút Follow và Tin nhắn */}
+        <View style={styles.actionRow}>
+          <Animated.View style={{ transform: [{ scale: followAnim }] }}>
+            <Pressable
+              style={[
+                styles.followButton,
+                isFollowing && {
+                  backgroundColor: "#fff",
+                  borderWidth: 1,
+                  borderColor: PINK,
+                },
+              ]}
+              onPress={handleFollow}
+            >
+              <Feather
+                name={isFollowing ? "user-check" : "user-plus"}
+                size={16}
+                color={isFollowing ? PINK : "#fff"}
+              />
+              <Text
+                style={[
+                  styles.followButtonText,
+                  isFollowing && { color: PINK },
+                ]}
+              >
+                {isFollowing ? " Following" : " Follow"}
+              </Text>
+            </Pressable>
+          </Animated.View>
+          <Pressable
+            style={styles.messageButton}
+            onPress={() => {
+              // TODO: Chuyển sang màn chat
+            }}
+          >
+            <Feather name="message-circle" size={16} color={PINK} />
+            <Text style={styles.messageButtonText}> Message</Text>
+          </Pressable>
+        </View>
 
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>
-              {profile?.followingCount ?? 0}
+              {otherProfile?.followingCount ?? 0}
             </Text>
             <Text style={styles.statLabel}>Following</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{profile?.followerCount ?? 0}</Text>
+            <Text style={styles.statNumber}>
+              {otherProfile?.followerCount ?? 0}
+            </Text>
             <Text style={styles.statLabel}>Followers</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{profile?.likeCount ?? 0}</Text>
+            <Text style={styles.statNumber}>
+              {otherProfile?.likeCount ?? 0}
+            </Text>
             <Text style={styles.statLabel}>Likes</Text>
           </View>
         </View>
 
-        {profile?.profile?.bio && (
-          <Text style={styles.bio}>{profile.profile.bio}</Text>
+        {otherProfile?.profile?.bio && (
+          <Text style={styles.bio}>{otherProfile.profile.bio}</Text>
         )}
 
         {/* === Tabs === */}
@@ -176,11 +261,7 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
             {TAB_KEYS.map((t, i) => {
               const active = t === tab;
               const iconName =
-                t === "My Videos"
-                  ? "play"
-                  : t === "My Images"
-                  ? "image"
-                  : "heart";
+                t === "Videos" ? "play" : t === "Images" ? "image" : "heart";
               return (
                 <Pressable
                   key={t}
@@ -224,34 +305,69 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
           }}
           columnWrapperStyle={{ gap: GUTTER }}
           ItemSeparatorComponent={() => <View style={{ height: GUTTER }} />}
-          scrollEnabled={false} // Tắt scroll của grid
+          scrollEnabled={false}
         />
       </View>
     </ScrollView>
   );
 };
 
-export default MyProfileScreen;
+export default OtherProfileScreen;
 
-/* === Styles === */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
+  backBtn: {
+    position: "absolute",
+    left: 16,
+    zIndex: 20,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 6,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOpacity: 0.07,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
   headerCenter: { alignItems: "center", paddingVertical: 12 },
   avatar: { width: 88, height: 88, borderRadius: 44, marginVertical: 10 },
   name: { fontSize: 20, fontWeight: "800", textAlign: "center" },
   username: { fontSize: 14, fontWeight: "600", color: "#666" },
   bio: { marginTop: 8, fontSize: 14, color: "#666", textAlign: "center" },
-  editButton: {
+  actionRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 18,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: "#f0a1be",
+    marginTop: 10,
+    gap: 12,
   },
-  editButtonText: { color: PINK, fontWeight: "600", fontSize: 14 },
+  followButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: PINK,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 18,
+  },
+  followButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  messageButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: PINK,
+    paddingHorizontal: 18,
+    paddingVertical: 8,
+    borderRadius: 18,
+    backgroundColor: "#fff",
+  },
+  messageButtonText: {
+    color: PINK,
+    fontWeight: "600",
+    fontSize: 14,
+  },
   statsRow: {
     marginTop: 10,
     width: "80%",

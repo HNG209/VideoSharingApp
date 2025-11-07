@@ -20,6 +20,7 @@ type UserCardProps = {
   isFollower: boolean;
   onFollow: (id: string) => void;
   onUnfollow: (id: string) => void;
+  onPress?: () => void;
 };
 
 const UserCard: React.FC<UserCardProps> = ({
@@ -31,6 +32,7 @@ const UserCard: React.FC<UserCardProps> = ({
   isFollowed,
   onFollow,
   onUnfollow,
+  onPress,
 }) => {
   const renderAction = () => {
     if (isFollowed) {
@@ -54,7 +56,7 @@ const UserCard: React.FC<UserCardProps> = ({
   };
 
   return (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         <Image source={{ uri: avatar }} style={styles.avatar} />
         <View style={{ flex: 1 }}>

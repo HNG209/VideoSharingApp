@@ -24,3 +24,8 @@ export const fetchUserPostService = async () => {
 
   return response.data.result;
 };
+
+export const fetchPostsByUserService = async (userId: string) => {
+  const response = await axiosInstance.get(`/posts/user/${userId}`);
+  return response.data.result;
+};

@@ -14,6 +14,7 @@ import RecordVideoScreen from "../screens/RecordVideoScreen"; // hoặc CreateVi
 import CameraStack from "./CameraStack";
 import { MainTabParamList } from "../types/navigation";
 import { VideoPostScreen } from "../screens/VideoPostScreen";
+import HomeStack from "./HomeStack";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 const PINK = "#ff2d7a";
@@ -51,7 +52,7 @@ export const MainTab = () => {
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Search" component={SearchScreen} />
 
       {/* Nút + giữa */}

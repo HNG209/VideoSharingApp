@@ -7,6 +7,7 @@ import { AuthStackParamList, MainStackParamList } from "../types/navigation";
 import { MainTab } from "./MainTab";
 import { VideoPostScreen } from "../screens/VideoPostScreen";
 import { VideoFeedScreen } from "../screens/VideoFeedScreen";
+import OtherProfileScreen from "../screens/OtherProfileScreen";
 
 const Stack = createNativeStackNavigator<MainStackParamList>();
 
@@ -27,6 +28,13 @@ export default function MainStack() {
       <Stack.Screen
         name="VideoFeed"
         component={VideoFeedScreen}
+        options={{
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="OtherProfile"
+        component={OtherProfileScreen}
         options={{
           animation: "slide_from_right",
         }}

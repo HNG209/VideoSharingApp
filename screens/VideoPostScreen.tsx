@@ -150,7 +150,6 @@ export const VideoPostScreen: React.FC<Props> = React.memo(
           content: commentInput,
         })
       );
-      // post.commentCount += 1; // Tăng tạm thời số lượng bình luận hiển thị
       setCommentInput("");
     };
 
