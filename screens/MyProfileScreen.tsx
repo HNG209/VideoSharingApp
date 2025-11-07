@@ -16,6 +16,7 @@ import {
   Pressable,
   Animated,
   LayoutChangeEvent,
+  ScrollView,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
@@ -122,7 +123,13 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      contentContainerStyle={{ paddingBottom: 100 }}
+    >
       {/* Profile info */}
       <View style={styles.headerCenter}>
         <Image
@@ -204,48 +211,23 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       </View>
 
-      {/* === Pager (3 pages horizontally) === */}
-      <Animated.FlatList
-        ref={pagerRef}
-        data={PAGES}
-        keyExtractor={(item) => item.key}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        getItemLayout={(_, index) => ({
-          length: SCREEN_W,
-          offset: SCREEN_W * index,
-          index,
-        })}
-        onMomentumScrollEnd={(e) => {
-          const index = Math.round(e.nativeEvent.contentOffset.x / SCREEN_W);
-          setTab(PAGES[index].key);
-        }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false }
-        )}
-        renderItem={({ item }) => (
-          <View style={{ width: SCREEN_W }}>
-            <FlatList
-              data={item.data}
-              numColumns={COLS}
-              keyExtractor={(it) => it._id}
-              renderItem={renderGridItem}
-              contentContainerStyle={{
-                paddingHorizontal: GUTTER,
-                paddingVertical: 10,
-              }}
-              columnWrapperStyle={{ gap: GUTTER }}
-              ItemSeparatorComponent={() => <View style={{ height: GUTTER }} />}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-            />
-          </View>
-        )}
-      />
-    </View>
+      {/* Pager (hiện chỉ lấy page đang chọn) */}
+      <View style={{ width: SCREEN_W }}>
+        <FlatList
+          data={PAGES[TAB_KEYS.indexOf(tab)].data}
+          numColumns={COLS}
+          keyExtractor={(it) => it._id}
+          renderItem={renderGridItem}
+          contentContainerStyle={{
+            paddingHorizontal: GUTTER,
+            paddingVertical: 10,
+          }}
+          columnWrapperStyle={{ gap: GUTTER }}
+          ItemSeparatorComponent={() => <View style={{ height: GUTTER }} />}
+          scrollEnabled={false} // Tắt scroll của grid
+        />
+      </View>
+    </ScrollView>
   );
 };
 

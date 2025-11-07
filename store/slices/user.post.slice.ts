@@ -6,6 +6,7 @@ import {
 } from "../../services/post.service";
 import { toggleLike } from "./like.slice";
 import { LikeResponse } from "../../types/like";
+import { createComment } from "./comment.slice";
 
 interface UserPost {
   posts: Post[];
@@ -95,6 +96,15 @@ const userPostSlice = createSlice({
       )
       .addCase(fetchUserPost.rejected, (state: UserPost) => {
         state.status = "error";
+      })
+
+      // Tăng comment count khi tạo bình luận
+      .addCase(createComment.fulfilled, (state: UserPost, action) => {
+        const postId = action.meta.arg.post;
+        const index = state.posts.findIndex((p) => p._id === postId);
+        if (index !== -1) {
+          state.posts[index].commentCount += 1;
+        }
       });
   },
 });

@@ -1,13 +1,21 @@
+import React from "react";
+import { CommentModel } from "../types/comment";
 import { Image, StyleSheet, Text, View } from "react-native";
 
-const CommentCard = ({ comment }: { comment: any }) => (
+interface Props {
+  comment: CommentModel;
+}
+
+const CommentCard = ({ comment }: Props) => (
   <View style={styles.commentCard}>
     <Image
-      source={{ uri: comment.user.profile.avatar }}
+      source={{ uri: comment.author.profile.avatar }}
       style={styles.commentAvatar}
     />
     <View style={{ flex: 1 }}>
-      <Text style={styles.commentName}>{comment.user.profile.displayName}</Text>
+      <Text style={styles.commentName}>
+        {comment.author.profile.displayName}
+      </Text>
       <Text style={styles.commentContent}>{comment.content}</Text>
     </View>
   </View>
@@ -40,4 +48,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CommentCard;
+export default React.memo(CommentCard);
