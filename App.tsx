@@ -8,7 +8,7 @@ import { useEffect } from "react";
 import { checkAuth } from "./store/slices/auth.slice";
 import { Alert } from "react-native";
 import LoadingScreen from "./screens/LoadingScreen";
-import MainStack from "./navigation/MainStack";
+import MainStack from "./navigation/RootStack";
 
 export default function App() {
   return (

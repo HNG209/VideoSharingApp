@@ -38,7 +38,7 @@ export const ProfileDrawer = () => {
 
   return (
     <Drawer.Navigator
-      initialRouteName="Profile"
+      initialRouteName="ProfileStack"
       drawerContent={(props) => (
         <CustomDrawerContent {...props} onLogout={handleLogout} />
       )}
@@ -63,7 +63,7 @@ export const ProfileDrawer = () => {
       }}
     >
       <Drawer.Screen
-        name="Profile"
+        name="ProfileStack"
         component={ProfileStack}
         options={{
           title: "Trang cá nhân",

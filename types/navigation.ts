@@ -26,16 +26,14 @@ export type ProfileStackParamList = {
 };
 
 export type MainTabParamList = {
-  Home: undefined;
-  MyProfile: undefined;
-  ProfileDetails: { id?: string } | undefined;
+  HomeStack: undefined;
+  ProfileDrawer: undefined;
   Search: undefined;
   Friends?: undefined;
-  Create: undefined;
-  Detail: { id: string };
+  CameraStack: undefined;
 };
 
-export type MainStackParamList = {
+export type RootStackParamList = {
   VideoFeed: { initialPost: Post; feedType: "profile" | "other" | "home" };
   MainTab: undefined;
   OtherProfile: { userId: string };
@@ -47,6 +45,6 @@ export type HomeStackParamList = {
 };
 
 export type ProfileDrawerParamList = {
-  Profile: undefined;
+  ProfileStack: undefined;
   ChangePassword: undefined;
 };

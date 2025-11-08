@@ -26,9 +26,9 @@ import { fetchOtherUserProfile } from "../store/slices/other.profile.slice";
 import { Post } from "../types/post";
 import VideoCard from "../components/VideoCard";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { MainStackParamList } from "../types/navigation";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { followUser, unfollowUser } from "../store/slices/follow.slice";
+import { RootStackParamList } from "../types/navigation";
 
 const SCREEN_W = Dimensions.get("window").width;
 const GUTTER = 10;
@@ -42,7 +42,7 @@ const TAB_KEYS = ["Videos", "Images", "Liked"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
 type Props = Partial<
-  NativeStackScreenProps<MainStackParamList, "OtherProfile">
+  NativeStackScreenProps<RootStackParamList, "OtherProfile">
 >;
 
 const OtherProfileScreen: React.FC<Props> = ({ navigation, route }) => {

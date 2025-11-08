@@ -1,17 +1,13 @@
-// src/navigation/AuthStack.tsx
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import LoginScreen from "../screens/LoginScreen";
-import RegisterScreen from "../screens/RegisterScreen";
-import { AuthStackParamList, MainStackParamList } from "../types/navigation";
+import { RootStackParamList } from "../types/navigation";
 import { MainTab } from "./MainTab";
-import { VideoPostScreen } from "../screens/VideoPostScreen";
 import { VideoFeedScreen } from "../screens/VideoFeedScreen";
 import OtherProfileScreen from "../screens/OtherProfileScreen";
 
-const Stack = createNativeStackNavigator<MainStackParamList>();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function MainStack() {
+export default function RootStack() {
   return (
     <Stack.Navigator
       screenOptions={{

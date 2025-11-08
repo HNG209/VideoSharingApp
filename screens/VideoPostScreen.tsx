@@ -33,10 +33,11 @@ const GREY = "#8E8E93";
 type Props = {
   post: Post;
   isVisible?: boolean;
+  onProfilePress?: () => void;
 };
 
 export const VideoPostScreen: React.FC<Props> = React.memo(
-  ({ post, isVisible }) => {
+  ({ post, isVisible, onProfilePress }) => {
     const videoRef = useRef<Video>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
@@ -126,17 +127,6 @@ export const VideoPostScreen: React.FC<Props> = React.memo(
     const handleEdit = () => {
       setShowOptions(false);
       // TODO: Chuyển sang màn hình chỉnh sửa post
-    };
-
-    const handleViewProfile = () => {
-      // TODO: Xử lý xem hồ sơ người dùng
-      // nếu là người dùng hiện tại thì chuyển đến trang cá nhân
-      // nếu là người dùng khác thì chuyển đến trang xem người dùng đó
-      if (user?.id === post.author._id) {
-        // navigation.navigate("Profile");
-      } else {
-        // navigation.navigate("UserProfile", { userId: post.author._id });
-      }
     };
 
     // Comment input state
@@ -285,7 +275,7 @@ export const VideoPostScreen: React.FC<Props> = React.memo(
           {/* Icon bên phải */}
           <View style={styles.rightColumn}>
             {/* avatar */}
-            <TouchableOpacity>
+            <TouchableOpacity onPress={onProfilePress} activeOpacity={0.7}>
               <Image
                 source={{ uri: post?.author?.profile.avatar }}
                 style={styles.avatar}

@@ -11,11 +11,11 @@ import { Ionicons } from "@expo/vector-icons";
 import { VideoPostScreen } from "./VideoPostScreen";
 import { RootState } from "../store/store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { MainStackParamList } from "../types/navigation";
+import { RootStackParamList } from "../types/navigation";
 
 const { height } = Dimensions.get("window");
 
-type Props = Partial<NativeStackScreenProps<MainStackParamList, "VideoFeed">>;
+type Props = Partial<NativeStackScreenProps<RootStackParamList, "VideoFeed">>;
 
 export const VideoFeedScreen = ({ route, navigation }: Props) => {
   const flatListRef = useRef<FlatList>(null);

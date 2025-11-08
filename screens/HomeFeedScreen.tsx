@@ -1,28 +1,35 @@
-import React, { useRef, useMemo, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   FlatList,
   StyleSheet,
   TouchableOpacity,
   View,
   Dimensions,
+  Text,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import { VideoPostScreen } from "./VideoPostScreen";
 import { AppDispatch, RootState } from "../store/store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { HomeStackParamList, MainStackParamList } from "../types/navigation";
+import { HomeStackParamList } from "../types/navigation";
 import { fetchUserFeed } from "../store/slices/feed.slice";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { height } = Dimensions.get("window");
 
 type Props = Partial<NativeStackScreenProps<HomeStackParamList, "HomeFeed">>;
 
-export const HomeFeedScreen = ({ route, navigation }: Props) => {
+export const HomeFeedScreen = ({ navigation }: Props) => {
   const flatListRef = useRef<FlatList>(null);
   const dispatch = useDispatch<AppDispatch>();
   const [visibleIndex, setVisibleIndex] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<"recommend" | "friends">(
+    "recommend"
+  );
   const posts = useSelector((state: RootState) => state.feed.posts);
+  const user = useSelector((state: RootState) => state.auth.user);
+  const insets = useSafeAreaInsets();
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: any[] }) => {
@@ -36,30 +43,87 @@ export const HomeFeedScreen = ({ route, navigation }: Props) => {
     dispatch(fetchUserFeed());
   }, []);
 
-  //   const initialIndex = useMemo(() => {
-  //     const idx = posts.findIndex((p) => p._id === initialPost?._id);
-  //     return idx >= 0 ? idx : 0;
-  //   }, [posts, initialPost]);
-
   if (!posts || posts.length === 0) {
     return <View style={[styles.container, { backgroundColor: "black" }]} />;
   }
 
+  const handleProfilePress = (authorId: string) => {
+    if (authorId === user?._id) {
+      navigation
+        ?.getParent() // Lấy navigator cha (MainTab)
+        ?.navigate("ProfileDrawer", {
+          // 1. Yêu cầu MainTab chuyển đến tab "ProfileDrawer"
+          screen: "ProfileStack", // 2. YÊU CẦU ProfileDrawer chuyển đến màn hình "ProfileStack"
+          params: {
+            screen: "Profile", // 3. YÊU CẦU ProfileStack chuyển đến màn hình "Profile"
+          },
+        });
+      return;
+    }
+
+    // Tương tự cho OtherProfile
+    // navigation?.getParent()?.navigate("OtherProfile", {
+    //   screen: "UserProfile",
+    //   params: { userId: authorId },
+    // });
+  };
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation?.navigate("Home")}
-        activeOpacity={0.7}
+      <View
+        style={[
+          styles.topBar,
+          {
+            paddingTop: insets.top,
+          },
+        ]}
       >
-        <Ionicons name="arrow-back" size={28} color="white" />
-      </TouchableOpacity>
+        <View style={styles.menuContainer}>
+          <TouchableOpacity
+            onPress={() => setActiveTab("recommend")}
+            activeOpacity={0.8}
+          >
+            <Text
+              style={[
+                styles.menuText,
+                activeTab === "recommend" && styles.menuTextActive,
+              ]}
+            >
+              Đề xuất
+            </Text>
+            {activeTab === "recommend" && <View style={styles.underline} />}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setActiveTab("friends")}
+            activeOpacity={0.8}
+          >
+            <Text
+              style={[
+                styles.menuText,
+                activeTab === "friends" && styles.menuTextActive,
+              ]}
+            >
+              Bạn bè
+            </Text>
+            {activeTab === "friends" && <View style={styles.underline} />}
+          </TouchableOpacity>
+        </View>
+
+        {/* Nút tìm kiếm */}
+        <TouchableOpacity
+          style={[styles.searchButton, { marginTop: insets.top }]}
+          activeOpacity={0.8}
+          onPress={() => console.log("Search pressed")}
+        >
+          <Ionicons name="search" size={22} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         ref={flatListRef}
         data={posts}
         keyExtractor={(item) => item._id}
-        // renderItem={({ item }) => <VideoPostScreen post={item} />}
         pagingEnabled
         showsVerticalScrollIndicator={false}
         windowSize={3}
@@ -74,17 +138,14 @@ export const HomeFeedScreen = ({ route, navigation }: Props) => {
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={{ itemVisiblePercentThreshold: 80 }}
         renderItem={({ item, index }) => (
-          <VideoPostScreen post={item} isVisible={index === visibleIndex} />
+          <VideoPostScreen
+            post={item}
+            isVisible={index === visibleIndex}
+            onProfilePress={() => handleProfilePress(item.author._id)}
+          />
         )}
-        // initialScrollIndex={initialIndex}
-        onScrollToIndexFailed={({ index }) => {
-          console.warn("Scroll failed, fallback to safe index:", index);
-          setTimeout(() => {
-            flatListRef.current?.scrollToIndex({
-              index: Math.max(0, Math.min(index, posts.length - 1)),
-              animated: false,
-            });
-          }, 300);
+        contentContainerStyle={{
+          flexGrow: 1,
         }}
       />
     </View>
@@ -94,15 +155,48 @@ export const HomeFeedScreen = ({ route, navigation }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black", // tránh bị flicker trắng khi render video
+    backgroundColor: "black",
   },
-  backButton: {
+  topBar: {
     position: "absolute",
-    top: 50,
-    left: 16,
-    zIndex: 10,
-    backgroundColor: "rgba(0,0,0,0.3)",
-    borderRadius: 20,
-    padding: 6,
+    top: 0,
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 20,
+    backgroundColor: "transparent",
+    paddingHorizontal: 10,
+  },
+  menuContainer: {
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    gap: 28,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  menuText: {
+    color: "#aaa",
+    fontSize: 17,
+    fontWeight: "500",
+    textAlign: "center",
+  },
+  menuTextActive: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+  underline: {
+    marginTop: 3,
+    height: 2,
+    width: "60%",
+    backgroundColor: "#fff",
+    alignSelf: "center",
+    borderRadius: 2,
+  },
+  searchButton: {
+    position: "absolute",
+    right: 16,
+    alignSelf: "center", // ✅ căn giữa hàng chữ
+    transform: [{ translateY: 2 }], // tinh chỉnh nhỏ để icon cân hoàn hảo
   },
 });
