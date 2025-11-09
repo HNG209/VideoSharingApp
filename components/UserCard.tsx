@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   card: {
     padding: 10,
     borderRadius: 12,
-    paddingRight: 70,
+    paddingRight:90,
     backgroundColor: "#fff",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "#eee",

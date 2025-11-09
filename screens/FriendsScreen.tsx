@@ -269,10 +269,10 @@ const FriendsScreen: React.FC<Props> = ({ navigation }) => {
         onLayout={onHeaderLayout}
       >
         <View style={styles.topRow}>
-          <Text style={styles.title}>Friends</Text>
-          <Pressable style={{ padding: 6 }}>
+          {/* <Text style={styles.title}>Friends</Text> */}
+          {/* <Pressable style={{ padding: 6 }}>
             <Feather name="bell" size={20} color={GREY} />
-          </Pressable>
+          </Pressable> */}
         </View>
 
         {/* Search box */}
@@ -348,7 +348,7 @@ const FriendsScreen: React.FC<Props> = ({ navigation }) => {
           </View>
         )}
 
-        {/* Filters */}
+        {/* Filters
         <View style={styles.filterRow}>
           {FILTERS.map((key) => {
             const active = key === filter;
@@ -366,7 +366,7 @@ const FriendsScreen: React.FC<Props> = ({ navigation }) => {
               </Pressable>
             );
           })}
-        </View>
+        </View> */}
 
         {/* Meta */}
         <View style={styles.metaRow}>
