@@ -17,6 +17,7 @@ import {
   Animated,
   LayoutChangeEvent,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,8 +25,12 @@ import { AppDispatch, RootState } from "../store/store";
 import { fetchUserPost } from "../store/slices/user.post.slice";
 import { Post } from "../types/post";
 import VideoCard from "../components/VideoCard";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { ProfileStackParamList } from "../types/navigation";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+import { ProfileStackParamList, RootStackParamList } from "../types/navigation";
+import { useNavigation } from "@react-navigation/native";
 
 const SCREEN_W = Dimensions.get("window").width;
 const GUTTER = 10;
@@ -39,9 +44,11 @@ const TAB_KEYS = ["My Videos", "My Images", "Liked"] as const;
 type TabKey = (typeof TAB_KEYS)[number];
 
 type Props = Partial<NativeStackScreenProps<ProfileStackParamList, "Profile">>;
+type RootNavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
-const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
-  const nav2 = navigation?.getParent()?.getParent()?.getParent();
+const MyProfileScreen: React.FC<Props> = ({ route }) => {
+  // const nav2 = navigation?.getParent()?.getParent()?.getParent();
+  const navigation = useNavigation<RootNavigationProps>();
   const dispatch = useDispatch<AppDispatch>();
   const profile = useSelector((state: RootState) => state.auth.user);
   const posts = useSelector((state: RootState) => state.userPost.posts);
@@ -115,7 +122,11 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
     <VideoCard
       post={item}
       onPress={() => {
-        nav2?.navigate("VideoFeed", { initialPost: item, feedType: "profile" });
+        // nav2?.navigate("VideoFeed", { initialPost: item, feedType: "profile" });
+        navigation.navigate("VideoFeed", {
+          initialPost: item,
+          feedType: "profile",
+        });
       }}
       width={CARD_W}
       height={CARD_W * 1.45}
@@ -143,27 +154,47 @@ const MyProfileScreen: React.FC<Props> = ({ navigation }) => {
 
         <Pressable
           style={styles.editButton}
-          onPress={() => navigation?.navigate("EditProfile")}
+          onPress={() =>
+            navigation?.navigate("MainTab", {
+              screen: "ProfileDrawer",
+              params: {
+                screen: "ProfileStack",
+                params: {
+                  screen: "EditProfile",
+                },
+              },
+            })
+          }
         >
           <Feather name="edit-2" size={14} color={PINK} />
           <Text style={styles.editButtonText}> Edit Profile</Text>
         </Pressable>
 
         <View style={styles.statsRow}>
-          <View style={styles.statItem}>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() =>
+              navigation?.navigate("Follow", { initialTab: "following", user: profile })
+            }
+          >
             <Text style={styles.statNumber}>
               {profile?.followingCount ?? 0}
             </Text>
             <Text style={styles.statLabel}>Following</Text>
-          </View>
-          <View style={styles.statItem}>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.statItem}
+            onPress={() =>
+              navigation?.navigate("Follow", { initialTab: "followers", user: profile })
+            }
+          >
             <Text style={styles.statNumber}>{profile?.followerCount ?? 0}</Text>
             <Text style={styles.statLabel}>Followers</Text>
-          </View>
-          <View style={styles.statItem}>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.statItem}>
             <Text style={styles.statNumber}>{profile?.likeCount ?? 0}</Text>
             <Text style={styles.statLabel}>Likes</Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         {profile?.profile?.bio && (

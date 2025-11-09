@@ -1,4 +1,6 @@
+import { NavigatorScreenParams } from "@react-navigation/native";
 import { Post } from "./post";
+import { User } from "./user";
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -15,7 +17,7 @@ export type AppStackParamList = {
   Detail: { id: string };
 };
 
-export type CameraStackParamLlist = {
+export type CameraStackParamList = {
   Camera: undefined;
   PostVideo: { uri: string | null };
 };
@@ -26,17 +28,18 @@ export type ProfileStackParamList = {
 };
 
 export type MainTabParamList = {
-  HomeStack: undefined;
-  ProfileDrawer: undefined;
+  HomeStack: NavigatorScreenParams<HomeStackParamList>;
+  ProfileDrawer: NavigatorScreenParams<ProfileDrawerParamList>;
   Search: undefined;
   Friends?: undefined;
-  CameraStack: undefined;
+  CameraStack: NavigatorScreenParams<CameraStackParamList>;
 };
 
 export type RootStackParamList = {
   VideoFeed: { initialPost: Post; feedType: "profile" | "other" | "home" };
-  MainTab: undefined;
+  MainTab: NavigatorScreenParams<MainTabParamList>;
   OtherProfile: { userId: string };
+  Follow: { initialTab?: "followers" | "following"; user: User | null };
 };
 
 export type HomeStackParamList = {
@@ -45,6 +48,6 @@ export type HomeStackParamList = {
 };
 
 export type ProfileDrawerParamList = {
-  ProfileStack: undefined;
+  ProfileStack: NavigatorScreenParams<ProfileStackParamList>;
   ChangePassword: undefined;
 };

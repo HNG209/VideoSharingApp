@@ -1,10 +1,10 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { CameraStackParamLlist } from "../types/navigation";
+import { CameraStackParamList } from "../types/navigation";
 import RecordVideoScreen from "../screens/RecordVideoScreen";
 import PostVideoScreen from "../screens/PostVideoScreen";
 
-const Stack = createNativeStackNavigator<CameraStackParamLlist>();
+const Stack = createNativeStackNavigator<CameraStackParamList>();
 
 export default function CameraStack() {
   return (

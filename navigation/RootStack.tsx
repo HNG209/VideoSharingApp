@@ -4,6 +4,7 @@ import { RootStackParamList } from "../types/navigation";
 import { MainTab } from "./MainTab";
 import { VideoFeedScreen } from "../screens/VideoFeedScreen";
 import OtherProfileScreen from "../screens/OtherProfileScreen";
+import FollowScreen from "../screens/FollowScreen";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -31,6 +32,13 @@ export default function RootStack() {
       <Stack.Screen
         name="OtherProfile"
         component={OtherProfileScreen}
+        options={{
+          animation: "slide_from_right",
+        }}
+      />
+      <Stack.Screen
+        name="Follow"
+        component={FollowScreen}
         options={{
           animation: "slide_from_right",
         }}

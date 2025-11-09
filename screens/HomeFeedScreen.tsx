@@ -11,16 +11,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import { VideoPostScreen } from "./VideoPostScreen";
 import { AppDispatch, RootState } from "../store/store";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { HomeStackParamList } from "../types/navigation";
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from "@react-navigation/native-stack";
+import { HomeStackParamList, RootStackParamList } from "../types/navigation";
 import { fetchUserFeed } from "../store/slices/feed.slice";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 
 const { height } = Dimensions.get("window");
 
 type Props = Partial<NativeStackScreenProps<HomeStackParamList, "HomeFeed">>;
+type RootNavigationProps = NativeStackNavigationProp<RootStackParamList>;
 
-export const HomeFeedScreen = ({ navigation }: Props) => {
+export const HomeFeedScreen = ({ route }: Props) => {
+  const navigation = useNavigation<RootNavigationProps>(); // test
+
   const flatListRef = useRef<FlatList>(null);
   const dispatch = useDispatch<AppDispatch>();
   const [visibleIndex, setVisibleIndex] = useState<number>(0);
@@ -49,15 +56,25 @@ export const HomeFeedScreen = ({ navigation }: Props) => {
 
   const handleProfilePress = (authorId: string) => {
     if (authorId === user?._id) {
-      navigation
-        ?.getParent() // Lấy navigator cha (MainTab)
-        ?.navigate("ProfileDrawer", {
-          // 1. Yêu cầu MainTab chuyển đến tab "ProfileDrawer"
-          screen: "ProfileStack", // 2. YÊU CẦU ProfileDrawer chuyển đến màn hình "ProfileStack"
+      navigation.navigate("MainTab", {
+        screen: "ProfileDrawer",
+        params: {
+          screen: "ProfileStack",
           params: {
-            screen: "Profile", // 3. YÊU CẦU ProfileStack chuyển đến màn hình "Profile"
+            screen: "Profile",
           },
-        });
+        },
+      });
+      // navigation
+      //   ?.getParent() // Lấy navigator cha (MainTab)
+      //   ?.navigate("ProfileDrawer", {
+      //     // 1. Yêu cầu MainTab chuyển đến tab "ProfileDrawer"
+      //     screen: "ProfileStack", // 2. YÊU CẦU ProfileDrawer chuyển đến màn hình "ProfileStack"
+      //     params: {
+      //       screen: "Profile", // 3. YÊU CẦU ProfileStack chuyển đến màn hình "Profile"
+      //     },
+      //   });
+
       return;
     }
 

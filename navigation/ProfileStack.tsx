@@ -5,6 +5,7 @@ import { ProfileStackParamList } from "../types/navigation";
 import MyProfileScreen from "../screens/MyProfileScreen";
 import EditProfileScreen from "../screens/EditProfileScreen";
 import { VideoPostScreen } from "../screens/VideoPostScreen";
+import FollowScreen from "../screens/FollowScreen";
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
@@ -29,6 +30,11 @@ export default function ProfileStack() {
           animation: "slide_from_right",
         }}
       />
+      {/* <Stack.Screen
+        name="Follow"
+        component={FollowScreen}
+        initialParams={{ userId: "123", initialTab: "followers" }}
+      /> */}
     </Stack.Navigator>
   );
 }
