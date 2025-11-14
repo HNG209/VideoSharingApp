@@ -50,7 +50,7 @@ const ChangePasswordScreen: React.FC<Props> = ({ navigation }) => {
   });
 
   return (
-    <View style={[styles.container]}>
+    <View style={styles.container}>
       <Text style={styles.title}>Đổi mật khẩu</Text>
       <Formik
         initialValues={{

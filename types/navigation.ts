@@ -50,4 +50,5 @@ export type HomeStackParamList = {
 export type ProfileDrawerParamList = {
   ProfileStack: NavigatorScreenParams<ProfileStackParamList>;
   ChangePassword: undefined;
+  Secure: undefined;
 };

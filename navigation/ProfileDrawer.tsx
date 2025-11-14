@@ -12,6 +12,7 @@ import { ProfileDrawerParamList } from "../types/navigation";
 import { logout } from "../store/slices/auth.slice";
 import { AppDispatch } from "../store/store";
 import { Ionicons } from "@expo/vector-icons";
+import TwoFactorAuthScreen from "../screens/TwoFactorAuthScreen";
 
 const Drawer = createDrawerNavigator<ProfileDrawerParamList>();
 
@@ -67,6 +68,13 @@ export const ProfileDrawer = () => {
         component={ProfileStack}
         options={{
           title: "Trang cá nhân",
+        }}
+      />
+      <Drawer.Screen
+        name="Secure"
+        component={TwoFactorAuthScreen}
+        options={{
+          title: "Bảo mật",
         }}
       />
       <Drawer.Screen
