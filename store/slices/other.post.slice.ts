@@ -4,8 +4,12 @@ import { fetchPostsByUserService } from "../../services/post.service";
 import { toggleLike } from "./like.slice";
 import { createComment } from "./comment.slice";
 
-export const fetchOtherUserPost = createAsyncThunk<Post[], string>(
-  "userPost/fetchOtherUserPost",
+export const fetchOtherUserPost = createAsyncThunk<
+  Post[],
+  string,
+  { state: any }
+>(
+  "otherUserPost/fetchOtherUserPost",
   async (userId, thunkAPI) => {
     try {
       return await fetchPostsByUserService(userId);
@@ -14,17 +18,35 @@ export const fetchOtherUserPost = createAsyncThunk<Post[], string>(
         `Fetch other user post thất bại\n${error.message}`
       );
     }
+  },
+  {
+    condition: (userId, { getState }) => {
+      const state = getState().otherUserPost;
+
+      // nếu userId đã có dữ liệu, không fetch lại
+      if (
+        state.postsByUser[userId] &&
+        state.postsByUser[userId].posts.length > 0
+      ) {
+        return false; // cancel thunk
+      }
+
+      return true; // fetch
+    },
   }
 );
 
-interface UserPost {
+interface UserPostEntry {
   posts: Post[];
   status: "idle" | "loading" | "success" | "error";
 }
 
-const initialState: UserPost = {
-  posts: [],
-  status: "idle",
+interface OtherUserPostState {
+  postsByUser: Record<string, UserPostEntry>;
+}
+
+const initialState: OtherUserPostState = {
+  postsByUser: {},
 };
 
 const otherUserPostSlice = createSlice({
@@ -33,45 +55,67 @@ const otherUserPostSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Like update trạng thái
-      .addCase(toggleLike.fulfilled, (state: UserPost, action) => {
-        const { liked } = action.payload;
+
+      // Toggle Like
+      .addCase(toggleLike.fulfilled, (state, action) => {
         if (action.meta.arg.onModel !== "post") return;
-        const index = state.posts.findIndex(
-          (p) => p._id === action.meta.arg.targetId
-        );
-        if (index !== -1) {
-          const post = state.posts[index];
-          // const likeCount = post.likeCount || 0;
-          state.posts[index] = {
-            ...post,
-            // likeCount: liked ? likeCount + 1 : Math.max(likeCount - 1, 0),
-            isLikedByCurrentUser: liked,
-          };
+
+        const postId = action.meta.arg.targetId;
+
+        // duyệt mọi user trong dictionary
+        for (const userId in state.postsByUser) {
+          const entry = state.postsByUser[userId];
+          const index = entry.posts.findIndex((p) => p._id === postId);
+          if (index !== -1) {
+            entry.posts[index].isLikedByCurrentUser = action.payload.liked;
+            break;
+          }
         }
       })
 
-      // Tăng comment count khi tạo bình luận
-      .addCase(createComment.fulfilled, (state: UserPost, action) => {
+      // Comment count increase
+      .addCase(createComment.fulfilled, (state, action) => {
         const postId = action.meta.arg.post;
-        const index = state.posts.findIndex((p) => p._id === postId);
-        if (index !== -1) {
-          state.posts[index].commentCount += 1;
+
+        for (const userId in state.postsByUser) {
+          const entry = state.postsByUser[userId];
+          const index = entry.posts.findIndex((p) => p._id === postId);
+
+          if (index !== -1) {
+            entry.posts[index].commentCount += 1;
+            break;
+          }
         }
       })
 
-      .addCase(fetchOtherUserPost.pending, (state: UserPost) => {
-        state.status = "loading";
-      })
-      .addCase(
-        fetchOtherUserPost.fulfilled,
-        (state: UserPost, action: PayloadAction<Post[]>) => {
-          state.posts = action.payload;
-          state.status = "success";
+      // Fetch posts
+      .addCase(fetchOtherUserPost.pending, (state, action) => {
+        const userId = action.meta.arg;
+
+        if (!state.postsByUser[userId]) {
+          state.postsByUser[userId] = { posts: [], status: "loading" };
+        } else {
+          state.postsByUser[userId].status = "loading";
         }
-      )
-      .addCase(fetchOtherUserPost.rejected, (state: UserPost) => {
-        state.status = "error";
+      })
+
+      .addCase(fetchOtherUserPost.fulfilled, (state, action) => {
+        const userId = action.meta.arg;
+
+        const posts = action.payload;
+
+        state.postsByUser[userId] = {
+          posts,
+          status: "success",
+        };
+      })
+
+      .addCase(fetchOtherUserPost.rejected, (state, action) => {
+        const userId = action.meta.arg;
+
+        if (!state.postsByUser[userId]) return;
+
+        state.postsByUser[userId].status = "error";
       });
   },
 });

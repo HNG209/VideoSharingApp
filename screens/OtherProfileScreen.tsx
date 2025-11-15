@@ -48,11 +48,13 @@ type Props = Partial<
 const OtherProfileScreen: React.FC<Props> = ({ navigation, route }) => {
   const insets = useSafeAreaInsets();
   const dispatch = useDispatch<AppDispatch>();
-  const userId = route?.params?.userId;
+  const userId = route?.params.userId || "";
   const otherProfile = useSelector(
     (state: RootState) => state.otherProfile.user
   );
-  const posts = useSelector((state: RootState) => state.otherUserPost.posts);
+  const posts = useSelector(
+    (state: RootState) => state.otherUserPost?.postsByUser[userId]?.posts || []
+  );
   const [refreshing, setRefreshing] = useState(false);
   const [tab, setTab] = useState<TabKey>("Videos");
   const [isFollowing, setIsFollowing] = useState(false);
