@@ -14,16 +14,16 @@ import { Video, ResizeMode } from "expo-av";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { CameraStackParamLlist } from "../types/navigation";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { uploadPostService } from "../services/post.service";
 import { uploadPost } from "../store/slices/user.post.slice";
+import { CameraStackParamList } from "../types/navigation";
 
 const PINK = "#ff2d7a";
 const BG = "#fff";
 
-type Props = NativeStackScreenProps<CameraStackParamLlist, "PostVideo">;
+type Props = NativeStackScreenProps<CameraStackParamList, "PostVideo">;
 
 const MAX_TAGS = 5;
 
