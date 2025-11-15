@@ -24,7 +24,7 @@ export default function App() {
 
 const RootNavigator = () => {
   const isLoggedIn = useSelector((state: RootState) => state.auth.isLoggedIn);
-  const authStatus = useSelector((state: RootState) => state.auth.status);
+  // const authStatus = useSelector((state: RootState) => state.auth.status);
   const dispatch = useDispatch<AppDispatch>();
 
   // Check authentication status on app start
@@ -44,15 +44,9 @@ const RootNavigator = () => {
     }
   }, [dispatch]);
 
-  return (
-    <>
-      {authStatus === "loading" || authStatus === "idle" ? (
-        <LoadingScreen />
-      ) : isLoggedIn ? (
-        <MainStack />
-      ) : (
-        <AuthStack />
-      )}
-    </>
-  );
+  // if (authStatus === "loading" || authStatus === "idle") {
+  //   return <LoadingScreen />;
+  // }
+
+  return isLoggedIn ? <MainStack /> : <AuthStack />;
 };

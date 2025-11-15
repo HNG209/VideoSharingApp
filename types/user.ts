@@ -11,6 +11,14 @@ export interface User {
     bio: string;
     avatar: string;
   };
+  secret:
+    | {
+        value: string;
+        uri: string;
+        verify: boolean;
+      }
+    | undefined
+    | null;
 }
 
 export interface PostAuthor {
@@ -46,6 +54,7 @@ export interface ChangePasswordValues {
 export interface LoginValues {
   username: string;
   password: string;
+  otp?: string;
 }
 
 export interface RegisterValues {

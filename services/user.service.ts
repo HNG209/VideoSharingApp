@@ -61,6 +61,7 @@ export const loginUserService = async (loginValues: LoginValues) => {
   const response = await axiosInstance.post("/users/login", {
     username: loginValues.username,
     password: loginValues.password,
+    otp: loginValues.otp,
   });
   // console.log("Login response:", response.data.data.user);
   const { accessToken, refreshToken, user } = response.data.result;

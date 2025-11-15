@@ -10,3 +10,15 @@ export const generateSecretService = async (): Promise<SecretResponse> => {
 
   return response.data.result;
 };
+
+export const enableTOTPService = async (token: string): Promise<boolean> => {
+  const response = await axiosInstance.put("/auth/totp", { token });
+
+  return response.data.result;
+};
+
+export const disableTOTPService = async (token: string): Promise<boolean> => {
+  const response = await axiosInstance.delete(`/auth/totp/${token}`);
+
+  return response.data.result;
+};

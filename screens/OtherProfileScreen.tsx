@@ -157,6 +157,7 @@ const OtherProfileScreen: React.FC<Props> = ({ navigation, route }) => {
       }),
     ]).start(() => {
       setIsFollowing((prev) => !prev);
+      console.log(isFollowing);
       if (isFollowing) {
         dispatch(unfollowUser(userId!));
       } else {
@@ -164,7 +165,7 @@ const OtherProfileScreen: React.FC<Props> = ({ navigation, route }) => {
       }
       // TODO: callback xử lý follow/unfollow ở đây
     });
-  }, []);
+  }, [isFollowing, dispatch]);
 
   return (
     <ScrollView
