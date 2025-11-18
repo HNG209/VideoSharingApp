@@ -58,8 +58,8 @@ export const login = createAsyncThunk<User, LoginValues>(
   async (loginValues, thunkAPI) => {
     try {
       return await loginUserService(loginValues);
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(`Đăng nhập thất bại\n${error.message}`);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
     }
   }
 );

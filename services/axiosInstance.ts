@@ -3,6 +3,8 @@ import * as Keychain from "react-native-keychain";
 import TokenService from "./token.service";
 import { BASE_URL } from "../types/path";
 import { refreshTokenService } from "./user.service";
+import { ErrorCode } from "../enums/ErrorCode";
+import { AppError } from "../types/error";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL || "http://192.168.1.6:5000/api",
@@ -29,8 +31,10 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 403 && !originalRequest._retry) {
-      console.log("expired!");
+    if (
+      error.response.data.errorCode === ErrorCode.TOKEN_EXPIRED &&
+      !originalRequest._retry
+    ) {
       originalRequest._retry = true;
 
       try {
@@ -46,12 +50,18 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    // Chuẩn hóa lỗi từ backend
-    if (error.response?.data?.message) {
-      return Promise.reject(new Error(error.response.data.message));
-    }
+    // Chuẩn hóa lỗi từ backend — TRẢ VỀ DẠNG AppError
+    if (error.response?.data) {
+      const { message, errorCode } = error.response.data;
 
-    return Promise.reject(error);
+      const appError: AppError = {
+        message: message || "Đã xảy ra lỗi",
+        errorCode: errorCode || null,
+        // status: error.response.status,
+      };
+
+      return Promise.reject(appError); // ném lỗi dạng AppError
+    }
   }
 );
 

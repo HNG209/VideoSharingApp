@@ -23,6 +23,7 @@ import {
 } from "../services/auth.service";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
+import { AppError } from "../types/error";
 
 type ModalPurpose = "ACTIVATE" | "DISABLE" | null;
 
@@ -63,7 +64,7 @@ const TwoFactorAuthScreen: React.FC = () => {
     }
   };
 
-  const accentColor: string = "#ff2d7a"; // --- HÀM SAO CHÉP KHÓA BÍ MẬT ---
+  const accentColor: string = "#ff2d7a";
 
   const handleCopySecretKey = useCallback(async () => {
     if (secretKey) {
@@ -90,7 +91,10 @@ const TwoFactorAuthScreen: React.FC = () => {
       setSecretKey(null);
       setUri("");
       closeModal(); // Đóng modal và reset state
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as AppError;
+      console.log("otp", error);
+
       Alert.alert(
         "Lỗi",
         error.message || "Mã OTP không chính xác. Không thể tắt 2FA."

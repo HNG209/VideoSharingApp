@@ -20,6 +20,8 @@ import { LoginValues } from "../types/user";
 import { login } from "../store/slices/auth.slice";
 import { AppDispatch, RootState } from "../store/store";
 import LoadingScreen from "./LoadingScreen";
+import { AppError } from "../types/error";
+import { ErrorCode } from "../enums/ErrorCode";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
@@ -47,16 +49,16 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
 
     try {
       // Thử đăng nhập lần đầu (không có OTP)
-      await dispatch(login(values)).unwrap(); // Nếu thành công, không cần làm gì thêm
-    } catch (error: any) {
-      const errorString = String(error).trim();
-      // console.log(errorString === "Required OTP");
-      if (error) {
-        setIsModalVisible(true);
+      await dispatch(login(values)).unwrap();
+    } catch (err) {
+      const error = err as AppError;
+
+      if (error.errorCode === ErrorCode.OTP_REQUIRED) {
         // Gặp lỗi 2FA, mở modal để nhập OTP
+        setIsModalVisible(true);
       } else {
         // Lỗi đăng nhập khác (sai user/pass)
-        Alert.alert("Thông báo", error.toString() || "Đăng nhập thất bại.");
+        Alert.alert("Thông báo", error.message || "Đăng nhập thất bại.");
         setTempLoginValues(null); // Xóa thông tin tạm thời nếu không phải lỗi OTP
       }
     } finally {
@@ -85,9 +87,10 @@ const LoginScreen: React.FC<Props> = ({ navigation }) => {
       setIsModalVisible(false);
       setOtpCode("");
       setTempLoginValues(null);
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as AppError;
       // Lỗi OTP hoặc lỗi server sau khi gửi OTP
-      Alert.alert("Thông báo", error.toString() || "Mã OTP không chính xác.");
+      Alert.alert("Thông báo", error.message || "Mã OTP không chính xác.");
     } finally {
       setIsLoggingIn(false);
     }
